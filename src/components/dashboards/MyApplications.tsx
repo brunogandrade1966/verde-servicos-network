@@ -73,10 +73,10 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
               Nenhuma candidatura enviada
             </h3>
             <p className="text-gray-500 mb-4">
-              Você ainda não se candidatou a nenhum projeto.
+              Você ainda não se candidatou a nenhuma demanda.
             </p>
             <Button onClick={() => navigate('/projects')} className="bg-green-600 hover:bg-green-700">
-              Buscar Projetos
+              Buscar Demandas
             </Button>
           </CardContent>
         </Card>

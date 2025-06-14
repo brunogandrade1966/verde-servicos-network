@@ -49,7 +49,7 @@ const DashboardStats = ({ applications, projectsCount }: DashboardStatsProps) =>
           <CardTitle className="text-2xl font-bold text-purple-600">
             {projectsCount}
           </CardTitle>
-          <CardDescription>Novos Projetos</CardDescription>
+          <CardDescription>Novas Demandas</CardDescription>
         </CardHeader>
       </Card>
     </div>

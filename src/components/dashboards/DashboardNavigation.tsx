@@ -10,7 +10,7 @@ const DashboardNavigation = () => {
     <div className="flex space-x-4 mb-6">
       <Button onClick={() => navigate('/projects')} className="bg-green-600 hover:bg-green-700">
         <Search className="h-4 w-4 mr-2" />
-        Buscar Projetos
+        Buscar Demandas
       </Button>
       <Button variant="outline" onClick={() => navigate('/professionals')}>
         <Users className="h-4 w-4 mr-2" />

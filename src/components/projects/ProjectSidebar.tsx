@@ -50,7 +50,7 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Informações do Projeto</CardTitle>
+          <CardTitle>Informações da Demanda</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
