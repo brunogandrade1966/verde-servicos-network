@@ -49,6 +49,7 @@ const ProjectApplications = ({ applications, profile, onApplicationUpdate }: Pro
         .eq('id', applicationId);
 
       if (error) {
+        console.error('Error accepting application:', error);
         toast({
           title: "Erro ao aceitar candidatura",
           description: error.message,
@@ -59,7 +60,7 @@ const ProjectApplications = ({ applications, profile, onApplicationUpdate }: Pro
 
       toast({
         title: "Candidatura aceita!",
-        description: `A candidatura de ${professionalName} foi aceita com sucesso.`
+        description: `A candidatura de ${professionalName} foi aceita. O projeto foi automaticamente movido para "Em Andamento" e outras candidaturas foram rejeitadas.`
       });
 
       // Atualizar a lista de candidaturas
@@ -114,7 +115,11 @@ const ProjectApplications = ({ applications, profile, onApplicationUpdate }: Pro
                       </p>
                     </div>
                   </div>
-                  <Badge variant={application.status === 'pending' ? 'secondary' : 'default'}>
+                  <Badge variant={
+                    application.status === 'pending' ? 'secondary' : 
+                    application.status === 'accepted' ? 'default' :
+                    application.status === 'rejected' ? 'destructive' : 'secondary'
+                  }>
                     {application.status === 'pending' ? 'Pendente' : 
                      application.status === 'accepted' ? 'Aceita' : 
                      application.status === 'rejected' ? 'Rejeitada' : application.status}
