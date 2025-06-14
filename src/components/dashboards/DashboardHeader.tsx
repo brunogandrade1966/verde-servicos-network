@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Leaf, Star, LogOut } from 'lucide-react';
+import { Leaf, Star, LogOut, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface DashboardHeaderProps {
@@ -34,6 +34,10 @@ const DashboardHeader = ({ profileName, profileAvatar, onSignOut }: DashboardHea
               </Avatar>
               <span className="text-sm text-gray-700">Olá, {profileName}</span>
             </div>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/messages')}>
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Mensagens
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
               <Star className="h-4 w-4 mr-2" />
               Perfil

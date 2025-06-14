@@ -1,13 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useConversations } from '@/hooks/useConversations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Leaf, ArrowLeft, Star, MapPin, Clock, DollarSign, GraduationCap, FileText, Award } from 'lucide-react';
+import { Leaf, ArrowLeft, Star, MapPin, Clock, DollarSign, GraduationCap, FileText, Award, MessageCircle } from 'lucide-react';
 
 interface Professional {
   id: string;
@@ -43,6 +44,8 @@ const ProfessionalProfileView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile } = useAuth();
+  const { createConversation } = useConversations(profile?.id);
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -108,9 +111,46 @@ const ProfessionalProfileView = () => {
     }
   };
 
-  const handleContact = () => {
-    if (professional?.phone) {
-      window.open(`https://wa.me/55${professional.phone.replace(/\D/g, '')}`, '_blank');
+  const handleContact = async () => {
+    if (!profile || !professional) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para entrar em contato.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (profile.user_type !== 'client') {
+      toast({
+        title: "Erro",
+        description: "Apenas clientes podem entrar em contato com profissionais.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Verificar se já existe uma conversa
+    const { data: existingConversation } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('client_id', profile.id)
+      .eq('professional_id', professional.id)
+      .single();
+
+    if (existingConversation) {
+      navigate('/messages');
+      return;
+    }
+
+    // Criar nova conversa
+    const conversation = await createConversation(profile.id, professional.id);
+    if (conversation) {
+      toast({
+        title: "Conversa criada!",
+        description: "Você pode agora trocar mensagens com o profissional."
+      });
+      navigate('/messages');
     }
   };
 
@@ -332,11 +372,12 @@ const ProfessionalProfileView = () => {
                 <CardTitle>Contato</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {professional.phone && (
+                {profile?.user_type === 'client' && (
                   <Button 
                     className="w-full bg-green-600 hover:bg-green-700"
                     onClick={handleContact}
                   >
+                    <MessageCircle className="h-4 w-4 mr-2" />
                     Entrar em Contato
                   </Button>
                 )}
