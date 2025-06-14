@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -23,6 +23,7 @@ export const useMessaging = (conversationId?: string) => {
   const { createNotification } = useNotifications();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const channelRef = useRef<any>(null);
 
   const fetchMessages = async () => {
     if (!conversationId) return;
@@ -153,6 +154,11 @@ export const useMessaging = (conversationId?: string) => {
 
     fetchMessages();
 
+    // Clean up any existing channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
     const channel = supabase
       .channel(`messages-${conversationId}`)
       .on(
@@ -207,8 +213,13 @@ export const useMessaging = (conversationId?: string) => {
       )
       .subscribe();
 
+    channelRef.current = channel;
+
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [conversationId, profile?.id]);
 
