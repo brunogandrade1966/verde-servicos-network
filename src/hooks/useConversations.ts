@@ -9,6 +9,7 @@ interface Conversation {
   professional_id: string;
   created_at: string;
   updated_at: string;
+  partnership_demand_id?: string;
   client?: {
     id: string;
     name: string;
@@ -23,6 +24,9 @@ interface Conversation {
     content: string;
     created_at: string;
     sender_id: string;
+  };
+  partnership_demands?: {
+    title: string;
   };
 }
 
@@ -40,7 +44,8 @@ export const useConversations = (userId: string | undefined) => {
         .select(`
           *,
           client:profiles!conversations_client_id_fkey(id, name, avatar_url),
-          professional:profiles!conversations_professional_id_fkey(id, name, avatar_url)
+          professional:profiles!conversations_professional_id_fkey(id, name, avatar_url),
+          partnership_demands(title)
         `)
         .or(`client_id.eq.${userId},professional_id.eq.${userId}`)
         .order('updated_at', { ascending: false });
@@ -63,11 +68,38 @@ export const useConversations = (userId: string | undefined) => {
     }
   };
 
-  const createConversation = async (clientId: string, professionalId: string) => {
+  const createConversation = async (clientId: string, professionalId: string, partnershipDemandId?: string) => {
     try {
+      // Verificar se já existe uma conversa entre estes usuários para esta parceria
+      const { data: existingConversation, error: checkError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('client_id', clientId)
+        .eq('professional_id', professionalId)
+        .eq('partnership_demand_id', partnershipDemandId || null)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking existing conversation:', checkError);
+        toast({
+          title: "Erro ao verificar conversa",
+          description: checkError.message,
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      if (existingConversation) {
+        return existingConversation;
+      }
+
       const { data, error } = await supabase
         .from('conversations')
-        .insert([{ client_id: clientId, professional_id: professionalId }])
+        .insert([{ 
+          client_id: clientId, 
+          professional_id: professionalId,
+          partnership_demand_id: partnershipDemandId || null
+        }])
         .select()
         .single();
 
@@ -88,6 +120,10 @@ export const useConversations = (userId: string | undefined) => {
     }
   };
 
+  const createPartnershipConversation = async (partnershipDemandId: string, creatorId: string, applicantId: string) => {
+    return await createConversation(creatorId, applicantId, partnershipDemandId);
+  };
+
   useEffect(() => {
     fetchConversations();
   }, [userId]);
@@ -96,6 +132,7 @@ export const useConversations = (userId: string | undefined) => {
     conversations,
     loading,
     fetchConversations,
-    createConversation
+    createConversation,
+    createPartnershipConversation
   };
 };
