@@ -1,16 +1,15 @@
 
-import { Card, CardContent } from '@/components/ui/card';
 import ProjectCard from './ProjectCard';
+import { Loader2, FolderOpen } from 'lucide-react';
 
 interface Project {
   id: string;
   title: string;
   description: string;
-  status: string;
+  location?: string;
+  deadline?: string;
   budget_min?: number;
   budget_max?: number;
-  deadline?: string;
-  location?: string;
   created_at: string;
   services: {
     name: string;
@@ -29,29 +28,28 @@ interface ProjectsGridProps {
 const ProjectsGrid = ({ projects, loading }: ProjectsGridProps) => {
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
       </div>
     );
   }
 
   if (projects.length === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-12">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Nenhum projeto encontrado
-          </h3>
-          <p className="text-gray-500 mb-4">
-            Tente ajustar os filtros de busca ou aguarde novos projetos.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <FolderOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          Nenhum projeto encontrado
+        </h3>
+        <p className="text-gray-500">
+          Tente ajustar os filtros para encontrar projetos que correspondam aos seus critérios.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
         <ProjectCard key={project.id} project={project} />
       ))}

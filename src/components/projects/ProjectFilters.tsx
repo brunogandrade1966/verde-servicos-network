@@ -1,8 +1,9 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Search, Filter } from 'lucide-react';
 
 interface Service {
   id: string;
@@ -11,52 +12,57 @@ interface Service {
 }
 
 interface ProjectFiltersProps {
-  searchQuery: string;
-  selectedService: string;
+  searchTerm: string;
   selectedCategory: string;
+  selectedService: string;
   services: Service[];
   onSearchChange: (value: string) => void;
-  onServiceChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
+  onServiceChange: (value: string) => void;
 }
 
 const ProjectFilters = ({
-  searchQuery,
-  selectedService,
+  searchTerm,
   selectedCategory,
+  selectedService,
   services,
   onSearchChange,
-  onServiceChange,
   onCategoryChange,
+  onServiceChange
 }: ProjectFiltersProps) => {
-  const categories = [...new Set(services.map(s => s.category))];
+  const categories = [...new Set(services.map(service => service.category))];
 
   return (
-    <Card className="mb-8">
+    <Card>
       <CardHeader>
-        <CardTitle>Filtros de Busca</CardTitle>
-        <CardDescription>
-          Use os filtros abaixo para encontrar projetos da sua área
-        </CardDescription>
+        <CardTitle className="flex items-center">
+          <Filter className="h-5 w-5 mr-2" />
+          Filtros
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="search">Buscar projetos</Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Buscar por título ou descrição..."
-              className="pl-10"
-              value={searchQuery}
+              id="search"
+              placeholder="Digite palavras-chave..."
+              value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10"
             />
           </div>
-          
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="category">Categoria</Label>
           <Select value={selectedCategory} onValueChange={onCategoryChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Selecione uma categoria" />
+              <SelectValue placeholder="Todas as categorias" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
+              <SelectItem value="all">Todas as categorias</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}
@@ -64,18 +70,23 @@ const ProjectFilters = ({
               ))}
             </SelectContent>
           </Select>
+        </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="service">Serviço Específico</Label>
           <Select value={selectedService} onValueChange={onServiceChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Selecione um serviço" />
+              <SelectValue placeholder="Todos os serviços" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os serviços</SelectItem>
-              {services.map((service) => (
-                <SelectItem key={service.id} value={service.name}>
-                  {service.name}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">Todos os serviços</SelectItem>
+              {services
+                .filter(service => selectedCategory === 'all' || service.category === selectedCategory)
+                .map((service) => (
+                  <SelectItem key={service.id} value={service.id}>
+                    {service.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
