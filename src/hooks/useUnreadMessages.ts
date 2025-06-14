@@ -9,6 +9,7 @@ export const useUnreadMessages = () => {
   const [loading, setLoading] = useState(true);
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
+  const profileIdRef = useRef<string | null>(null);
 
   const fetchUnreadCount = async () => {
     if (!profile?.id) return;
@@ -33,21 +34,40 @@ export const useUnreadMessages = () => {
     }
   };
 
+  const cleanupSubscription = async () => {
+    if (channelRef.current && isSubscribedRef.current) {
+      try {
+        await supabase.removeChannel(channelRef.current);
+      } catch (error) {
+        console.error('Error removing channel:', error);
+      }
+      channelRef.current = null;
+      isSubscribedRef.current = false;
+    }
+  };
+
   useEffect(() => {
     if (!profile?.id) return;
+
+    // If the profile ID changed, clean up the old subscription
+    if (profileIdRef.current && profileIdRef.current !== profile.id) {
+      cleanupSubscription();
+    }
+    
+    profileIdRef.current = profile.id;
+
+    // If already subscribed for this profile, don't subscribe again
+    if (isSubscribedRef.current && channelRef.current) {
+      fetchUnreadCount();
+      return;
+    }
 
     fetchUnreadCount();
 
     // Clean up any existing subscription
-    if (channelRef.current && isSubscribedRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-      isSubscribedRef.current = false;
-    }
+    cleanupSubscription();
 
-    // Prevent multiple subscriptions
-    if (isSubscribedRef.current) return;
-
+    // Create new subscription
     const channel = supabase
       .channel(`unread-messages-${profile.id}-${Date.now()}`)
       .on(
@@ -85,19 +105,18 @@ export const useUnreadMessages = () => {
         }
       )
       .subscribe((status) => {
+        console.log('Unread messages subscription status:', status);
         if (status === 'SUBSCRIBED') {
           isSubscribedRef.current = true;
+        } else if (status === 'CLOSED') {
+          isSubscribedRef.current = false;
         }
       });
 
     channelRef.current = channel;
 
     return () => {
-      if (channelRef.current && isSubscribedRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        isSubscribedRef.current = false;
-      }
+      cleanupSubscription();
     };
   }, [profile?.id]);
 
