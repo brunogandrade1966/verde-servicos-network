@@ -11,6 +11,8 @@ import ProjectDetailsHeader from '@/components/projects/ProjectDetailsHeader';
 import ProjectInfo from '@/components/projects/ProjectInfo';
 import ProjectApplications from '@/components/projects/ProjectApplications';
 import ProjectSidebar from '@/components/projects/ProjectSidebar';
+import ProjectStatusUpdater from '@/components/projects/ProjectStatusUpdater';
+import ProjectTimeline from '@/components/projects/ProjectTimeline';
 
 interface Project {
   id: string;
@@ -22,6 +24,7 @@ interface Project {
   deadline?: string;
   location?: string;
   created_at: string;
+  updated_at: string;
   client_id: string;
   services: {
     name: string;
@@ -104,6 +107,35 @@ const ProjectDetails = () => {
     }
   };
 
+  const handleStatusUpdate = () => {
+    fetchProject(); // Recarregar dados do projeto após atualização de status
+  };
+
+  const isOwner = profile?.id === project?.client_id;
+  const isContractedStatus = project?.status && ['contracted', 'in_progress', 'completed'].includes(project.status);
+
+  // Criar timeline mock - em uma implementação completa, isso viria do banco de dados
+  const createTimelineEvents = (project: Project) => {
+    const events = [
+      { status: 'draft', date: project.created_at },
+      { status: 'open', date: project.created_at }
+    ];
+
+    if (isContractedStatus) {
+      events.push({ status: 'contracted', date: project.updated_at });
+    }
+
+    if (project.status === 'in_progress') {
+      events.push({ status: 'in_progress', date: project.updated_at });
+    }
+
+    if (project.status === 'completed') {
+      events.push({ status: 'completed', date: project.updated_at });
+    }
+
+    return events;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
@@ -140,12 +172,35 @@ const ProjectDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <ProjectInfo project={project} />
+            
+            {/* Timeline do projeto para projetos contratados */}
+            {isContractedStatus && (
+              <ProjectTimeline 
+                events={createTimelineEvents(project)}
+                currentStatus={project.status}
+              />
+            )}
+
             {/* Só mostrar candidaturas se o usuário for o cliente dono da demanda */}
             {profile?.user_type === 'client' && profile?.id === project.client_id && (
               <ProjectApplications applications={project.applications} profile={profile} />
             )}
           </div>
-          <ProjectSidebar project={project} profile={profile} />
+          
+          <div className="space-y-6">
+            <ProjectSidebar project={project} profile={profile} />
+            
+            {/* Atualizador de status */}
+            {isContractedStatus && (
+              <ProjectStatusUpdater
+                projectId={project.id}
+                currentStatus={project.status}
+                userType={profile?.user_type as 'client' | 'professional'}
+                isOwner={isOwner || profile?.user_type === 'professional'}
+                onStatusUpdate={handleStatusUpdate}
+              />
+            )}
+          </div>
         </div>
       </main>
     </div>
