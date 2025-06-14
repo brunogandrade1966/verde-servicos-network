@@ -1,109 +1,107 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useConversations } from '@/hooks/useConversations';
-import { useMessages } from '@/hooks/useMessages';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Leaf, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import ConversationsList from '@/components/messages/ConversationsList';
-import MessagesList from '@/components/messages/MessagesList';
-import MessageInput from '@/components/messages/MessageInput';
+import { useMessaging } from '@/hooks/useMessaging';
+import MessagesHeader from '@/components/messages/MessagesHeader';
+import ConversationPreview from '@/components/messages/ConversationPreview';
+import ConversationView from '@/components/messages/ConversationView';
+import { Card, CardContent } from '@/components/ui/card';
+import { MessageCircle } from 'lucide-react';
 
 const Messages = () => {
-  const navigate = useNavigate();
   const { profile } = useAuth();
-  const [selectedConversationId, setSelectedConversationId] = useState<string>();
-  
-  const { conversations, loading: conversationsLoading } = useConversations(profile?.id);
-  const { messages, sendMessage, loading: messagesLoading } = useMessages(selectedConversationId);
+  const { conversations, loading, totalUnreadCount } = useMessaging(profile?.id);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
-  const handleSendMessage = async (content: string) => {
-    if (profile?.id) {
-      await sendMessage(content, profile.id);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Acesso negado
+              </h3>
+              <p className="text-gray-500">
+                Você precisa estar logado para acessar as mensagens.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Button>
-              <Leaf className="h-8 w-8 text-green-600" />
-              <h1 className="text-xl font-bold text-gray-900">Mensagens</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <MessagesHeader 
+          totalConversations={conversations.length}
+          unreadCount={totalUnreadCount}
+        />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
-          {/* Lista de Conversas */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Conversas</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 overflow-y-auto max-h-96">
-              {conversationsLoading ? (
-                <div className="p-4 text-center text-gray-500">
-                  Carregando conversas...
-                </div>
-              ) : conversations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
-                  Nenhuma conversa encontrada
-                </div>
+        <div className="mt-8">
+          {selectedConversationId ? (
+            <ConversationView
+              conversationId={selectedConversationId}
+              currentUserId={profile.id}
+              onBack={() => setSelectedConversationId(null)}
+            />
+          ) : (
+            <div className="space-y-4">
+              {conversations.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Nenhuma conversa encontrada
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Você ainda não possui conversas ativas.
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      {profile.user_type === 'client' 
+                        ? 'Entre em contato com profissionais através dos perfis deles.'
+                        : 'Aguarde clientes entrarem em contato ou candidate-se a projetos.'
+                      }
+                    </p>
+                  </CardContent>
+                </Card>
               ) : (
-                <div className="p-4">
-                  <ConversationsList
-                    conversations={conversations}
-                    selectedConversationId={selectedConversationId}
-                    onConversationSelect={setSelectedConversationId}
-                  />
-                </div>
+                <>
+                  <div className="mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Suas Conversas ({conversations.length})
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      Clique em uma conversa para ver as mensagens
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    {conversations.map((conversation) => (
+                      <ConversationPreview
+                        key={conversation.id}
+                        conversation={conversation}
+                        currentUserId={profile.id}
+                        onClick={() => setSelectedConversationId(conversation.id)}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Área de Mensagens */}
-          <Card className="lg:col-span-2 flex flex-col">
-            {selectedConversation ? (
-              <>
-                <CardHeader className="border-b">
-                  <CardTitle>
-                    {profile?.id === selectedConversation.client_id 
-                      ? selectedConversation.professional?.name 
-                      : selectedConversation.client?.name}
-                  </CardTitle>
-                </CardHeader>
-                <div className="flex-1 flex flex-col">
-                  {messagesLoading ? (
-                    <div className="flex-1 flex items-center justify-center">
-                      <p className="text-gray-500">Carregando mensagens...</p>
-                    </div>
-                  ) : (
-                    <MessagesList messages={messages} />
-                  )}
-                  <MessageInput onSendMessage={handleSendMessage} />
-                </div>
-              </>
-            ) : (
-              <CardContent className="flex-1 flex items-center justify-center">
-                <p className="text-gray-500 text-center">
-                  Selecione uma conversa para começar a trocar mensagens
-                </p>
-              </CardContent>
-            )}
-          </Card>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 };

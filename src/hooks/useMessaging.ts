@@ -7,41 +7,85 @@ interface Conversation {
   id: string;
   client_id: string;
   professional_id: string;
-  created_at: string;
   updated_at: string;
-  partnership_demand_id?: string;
-  client_profile: {
+  client_profile?: {
     name: string;
     avatar_url?: string;
   };
-  professional_profile: {
+  professional_profile?: {
     name: string;
     avatar_url?: string;
   };
+  last_message?: {
+    content: string;
+    created_at: string;
+    sender_id: string;
+  };
+  unread_count?: number;
 }
 
-export const useConversations = (userId: string | undefined) => {
+export const useMessaging = (userId: string | undefined) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (userId) {
+      fetchConversations();
+    }
+  }, [userId]);
 
   const fetchConversations = async () => {
     if (!userId) return;
 
-    setLoading(true);
     try {
-      const { data, error } = await supabase
+      setLoading(true);
+      
+      // Buscar conversas onde o usuário participa
+      const { data: conversationsData, error: conversationsError } = await supabase
         .from('conversations')
         .select(`
-          *,
+          id,
+          client_id,
+          professional_id,
+          updated_at,
           client_profile:profiles!conversations_client_id_fkey(name, avatar_url),
           professional_profile:profiles!conversations_professional_id_fkey(name, avatar_url)
         `)
         .or(`client_id.eq.${userId},professional_id.eq.${userId}`)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
-      setConversations(data || []);
+      if (conversationsError) throw conversationsError;
+
+      // Para cada conversa, buscar a última mensagem e contar não lidas
+      const conversationsWithDetails = await Promise.all(
+        (conversationsData || []).map(async (conversation) => {
+          // Última mensagem
+          const { data: lastMessage } = await supabase
+            .from('messages')
+            .select('content, created_at, sender_id')
+            .eq('conversation_id', conversation.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          // Contagem de mensagens não lidas (enviadas por outros para o usuário atual)
+          const { count: unreadCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conversation.id)
+            .neq('sender_id', userId)
+            .is('read_at', null);
+
+          return {
+            ...conversation,
+            last_message: lastMessage,
+            unread_count: unreadCount || 0
+          };
+        })
+      );
+
+      setConversations(conversationsWithDetails);
     } catch (error) {
       console.error('Error fetching conversations:', error);
       toast({
@@ -54,15 +98,15 @@ export const useConversations = (userId: string | undefined) => {
     }
   };
 
-  const createConversation = async (clientId: string, professionalId: string, partnershipDemandId?: string) => {
+  const createConversation = async (clientId: string, professionalId: string) => {
     try {
-      // Verificar se já existe uma conversa entre essas pessoas
+      // Verificar se já existe uma conversa
       const { data: existing } = await supabase
         .from('conversations')
         .select('id')
         .eq('client_id', clientId)
         .eq('professional_id', professionalId)
-        .maybeSingle();
+        .single();
 
       if (existing) {
         return existing;
@@ -73,8 +117,7 @@ export const useConversations = (userId: string | undefined) => {
         .from('conversations')
         .insert({
           client_id: clientId,
-          professional_id: professionalId,
-          partnership_demand_id: partnershipDemandId
+          professional_id: professionalId
         })
         .select()
         .single();
@@ -86,7 +129,7 @@ export const useConversations = (userId: string | undefined) => {
         description: "Você pode agora trocar mensagens."
       });
 
-      // Atualizar lista de conversas
+      // Recarregar conversas
       await fetchConversations();
       
       return data;
@@ -101,14 +144,15 @@ export const useConversations = (userId: string | undefined) => {
     }
   };
 
-  useEffect(() => {
-    fetchConversations();
-  }, [userId]);
+  const getTotalUnreadCount = () => {
+    return conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0);
+  };
 
   return {
     conversations,
     loading,
     createConversation,
-    refreshConversations: fetchConversations
+    refreshConversations: fetchConversations,
+    totalUnreadCount: getTotalUnreadCount()
   };
 };
