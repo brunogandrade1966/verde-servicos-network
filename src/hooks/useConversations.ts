@@ -27,7 +27,7 @@ interface Conversation {
   };
   partnership_demands?: {
     title: string;
-  };
+  } | null;
 }
 
 export const useConversations = (userId: string | undefined) => {
@@ -60,7 +60,13 @@ export const useConversations = (userId: string | undefined) => {
         return;
       }
 
-      setConversations(data || []);
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(conv => ({
+        ...conv,
+        partnership_demands: conv.partnership_demands || null
+      }));
+
+      setConversations(transformedData);
     } catch (error) {
       console.error('Error:', error);
     } finally {

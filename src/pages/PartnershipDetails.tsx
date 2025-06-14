@@ -37,6 +37,21 @@ interface PartnershipDemand {
   };
 }
 
+interface Application {
+  id: string;
+  professional_id: string;
+  proposal: string;
+  proposed_price?: number;
+  estimated_duration?: string;
+  created_at: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  professional?: {
+    name: string;
+    avatar_url?: string;
+    area_of_expertise?: string;
+  };
+}
+
 const PartnershipDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { profile } = useAuth();
@@ -44,7 +59,7 @@ const PartnershipDetails = () => {
   const navigate = useNavigate();
   const [demand, setDemand] = useState<PartnershipDemand | null>(null);
   const [loading, setLoading] = useState(true);
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -85,8 +100,11 @@ const PartnershipDetails = () => {
   const fetchApplications = async () => {
     try {
       const { data, error } = await supabase
-        .from('applications')
-        .select('*')
+        .from('partnership_applications')
+        .select(`
+          *,
+          professional:profiles!partnership_applications_professional_id_fkey(name, avatar_url, area_of_expertise)
+        `)
         .eq('partnership_demand_id', id);
 
       if (error) {
@@ -96,7 +114,7 @@ const PartnershipDetails = () => {
           variant: "destructive"
         });
       } else {
-        setApplications(data);
+        setApplications(data || []);
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -137,10 +155,10 @@ const PartnershipDetails = () => {
   const hasApplied = applications.some(app => app.professional_id === profile?.id);
   const canApply = !isOwnDemand && !hasApplied && demand?.status === 'open';
 
-  const updateApplicationStatus = async (applicationId: string, status: string) => {
+  const updateApplicationStatus = async (applicationId: string, status: 'pending' | 'accepted' | 'rejected') => {
     try {
-      const { data, error } = await supabase
-        .from('applications')
+      const { error } = await supabase
+        .from('partnership_applications')
         .update({ status })
         .eq('id', applicationId);
 
