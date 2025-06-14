@@ -23,12 +23,10 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(true);
   const channelRef = useRef<any>(null);
 
-  // Fetch notifications
   const fetchNotifications = async () => {
     if (!profile?.id) return;
 
     try {
-      // Use any to bypass TypeScript errors until the types are regenerated
       const { data, error } = await (supabase as any)
         .from('notifications')
         .select('*')
@@ -51,7 +49,6 @@ export const useNotifications = () => {
     }
   };
 
-  // Mark notification as read
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await (supabase as any)
@@ -73,7 +70,6 @@ export const useNotifications = () => {
     }
   };
 
-  // Mark all notifications as read
   const markAllAsRead = async () => {
     if (!profile?.id) return;
 
@@ -96,7 +92,6 @@ export const useNotifications = () => {
     }
   };
 
-  // Create notification
   const createNotification = async (
     userId: string,
     type: Notification['type'],
@@ -125,19 +120,19 @@ export const useNotifications = () => {
     }
   };
 
-  // Subscribe to real-time notifications
   useEffect(() => {
     if (!profile?.id) return;
 
     fetchNotifications();
 
-    // Clean up any existing channel
+    // Clean up any existing channel first
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
 
     const channel = supabase
-      .channel(`notifications-changes-${profile.id}`)
+      .channel(`notifications-${profile.id}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -151,7 +146,6 @@ export const useNotifications = () => {
           setNotifications(prev => [newNotification, ...prev]);
           setUnreadCount(prev => prev + 1);
 
-          // Show toast notification
           toast({
             title: newNotification.title,
             description: newNotification.message,

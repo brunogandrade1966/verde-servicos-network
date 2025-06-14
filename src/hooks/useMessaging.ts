@@ -60,7 +60,6 @@ export const useMessaging = (conversationId?: string) => {
     if (!conversationId || !profile?.id) return;
 
     try {
-      // Get conversation details to identify the recipient
       const { data: conversation } = await supabase
         .from('conversations')
         .select(`
@@ -74,7 +73,6 @@ export const useMessaging = (conversationId?: string) => {
 
       if (!conversation) return;
 
-      // Insert the message
       const { data: message, error } = await supabase
         .from('messages')
         .insert({
@@ -97,14 +95,12 @@ export const useMessaging = (conversationId?: string) => {
         return;
       }
 
-      // Determine recipient
       const recipientId = profile.id === conversation.client_id 
         ? conversation.professional_id 
         : conversation.client_id;
 
       const senderName = profile.name || 'Usuário';
 
-      // Create notification for recipient
       if (recipientId) {
         await createNotification(
           recipientId,
@@ -148,19 +144,19 @@ export const useMessaging = (conversationId?: string) => {
     }
   };
 
-  // Subscribe to real-time messages
   useEffect(() => {
     if (!conversationId) return;
 
     fetchMessages();
 
-    // Clean up any existing channel
+    // Clean up any existing channel first
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
 
     const channel = supabase
-      .channel(`messages-${conversationId}`)
+      .channel(`messages-${conversationId}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -172,7 +168,6 @@ export const useMessaging = (conversationId?: string) => {
         async (payload) => {
           const newMessage = payload.new;
           
-          // Fetch sender info
           const { data: sender } = await supabase
             .from('profiles')
             .select('id, name, avatar_url')
@@ -186,7 +181,6 @@ export const useMessaging = (conversationId?: string) => {
 
           setMessages(prev => [...prev, messageWithSender]);
 
-          // Auto-mark as read if the message is from another user and we're viewing the conversation
           if (newMessage.sender_id !== profile?.id) {
             setTimeout(() => markAsRead(newMessage.id), 1000);
           }

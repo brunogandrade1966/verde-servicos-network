@@ -38,13 +38,14 @@ export const useUnreadMessages = () => {
 
     fetchUnreadCount();
 
-    // Clean up any existing channel
+    // Clean up any existing channel first
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
 
     const channel = supabase
-      .channel(`unread-messages-changes-${profile.id}`)
+      .channel(`unread-messages-${profile.id}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -54,7 +55,6 @@ export const useUnreadMessages = () => {
         },
         (payload) => {
           const newMessage = payload.new as any;
-          // If the message is not from the current user and not read
           if (newMessage.sender_id !== profile.id && !newMessage.read_at) {
             setUnreadCount(prev => prev + 1);
           }
@@ -71,7 +71,6 @@ export const useUnreadMessages = () => {
           const updatedMessage = payload.new as any;
           const oldMessage = payload.old as any;
           
-          // If message was marked as read and it wasn't from current user
           if (
             !oldMessage.read_at && 
             updatedMessage.read_at && 
