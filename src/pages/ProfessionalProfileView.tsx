@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useConversations } from '@/hooks/useConversations';
 import { useReviews } from '@/hooks/useReviews';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +20,12 @@ import {
   DollarSign,
   User,
   Mail,
-  Phone
+  Phone,
+  Leaf,
+  Clock,
+  Award,
+  GraduationCap,
+  FileText
 } from 'lucide-react';
 import DashboardNavigation from '@/components/dashboards/DashboardNavigation';
 import RatingDisplay from '@/components/reviews/RatingDisplay';
