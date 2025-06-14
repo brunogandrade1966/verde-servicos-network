@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,6 +18,7 @@ import ContractedProjects from './pages/ContractedProjects';
 import Messages from './pages/Messages';
 import ManageServices from './pages/ManageServices';
 import Partnerships from './pages/Partnerships';
+import Services from './pages/Services';
 import { Toaster } from '@/components/ui/toaster';
 import ReviewProfessional from './pages/ReviewProfessional';
 
@@ -55,7 +57,7 @@ function App() {
                 path="/services"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <Services />
                   </ProtectedRoute>
                 }
               />
