@@ -9,6 +9,8 @@ import DashboardStats from './DashboardStats';
 import DashboardNavigation from './DashboardNavigation';
 import RecentProjects from './RecentProjects';
 import MyApplications from './MyApplications';
+import ActiveProjects from './ActiveProjects';
+import ActivePartnerships from './ActivePartnerships';
 
 interface Project {
   id: string;
@@ -39,10 +41,36 @@ interface Application {
   };
 }
 
+interface ActiveProject {
+  id: string;
+  title: string;
+  status: string;
+  deadline?: string;
+  client: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+  };
+}
+
+interface ActivePartnership {
+  id: string;
+  title: string;
+  status: string;
+  deadline?: string;
+  creator: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+  };
+}
+
 const ProfessionalDashboard = () => {
   const { profile, signOut } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [activeProjects, setActiveProjects] = useState<ActiveProject[]>([]);
+  const [activePartnerships, setActivePartnerships] = useState<ActivePartnership[]>([]);
   const [partnershipsCount, setPartnershipsCount] = useState(0);
   const [partnershipApplicationsCount, setPartnershipApplicationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -75,6 +103,54 @@ const ProfessionalDashboard = () => {
         });
       } else {
         setProjects(projectsData || []);
+      }
+
+      // Fetch active projects where professional was accepted
+      const { data: acceptedApplications } = await supabase
+        .from('applications')
+        .select('project_id')
+        .eq('professional_id', profile?.id)
+        .eq('status', 'accepted');
+
+      if (acceptedApplications && acceptedApplications.length > 0) {
+        const projectIds = acceptedApplications.map(app => app.project_id);
+        const { data: activeProjectsData } = await supabase
+          .from('projects')
+          .select(`
+            id,
+            title,
+            status,
+            deadline,
+            client:profiles!projects_client_id_fkey(id, name, avatar_url)
+          `)
+          .in('id', projectIds)
+          .in('status', ['in_progress', 'completed']);
+
+        setActiveProjects(activeProjectsData || []);
+      }
+
+      // Fetch active partnerships where professional was accepted
+      const { data: acceptedPartnershipApplications } = await supabase
+        .from('partnership_applications')
+        .select('partnership_demand_id')
+        .eq('professional_id', profile?.id)
+        .eq('status', 'accepted');
+
+      if (acceptedPartnershipApplications && acceptedPartnershipApplications.length > 0) {
+        const partnershipIds = acceptedPartnershipApplications.map(app => app.partnership_demand_id);
+        const { data: activePartnershipsData } = await supabase
+          .from('partnership_demands')
+          .select(`
+            id,
+            title,
+            status,
+            deadline,
+            creator:profiles!partnership_demands_professional_id_fkey(id, name, avatar_url)
+          `)
+          .in('id', partnershipIds)
+          .in('status', ['in_progress', 'completed']);
+
+        setActivePartnerships(activePartnershipsData || []);
       }
 
       // Fetch partnership demands count
@@ -145,6 +221,28 @@ const ProfessionalDashboard = () => {
         />
 
         <DashboardNavigation />
+
+        {/* Active Projects and Partnerships Section */}
+        {(activeProjects.length > 0 || activePartnerships.length > 0) && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Projetos e Parcerias em Andamento</h2>
+            <div className="grid lg:grid-cols-2 gap-8">
+              {activeProjects.length > 0 && (
+                <ActiveProjects 
+                  projects={activeProjects} 
+                  loading={loading} 
+                />
+              )}
+              
+              {activePartnerships.length > 0 && (
+                <ActivePartnerships 
+                  partnerships={activePartnerships} 
+                  loading={loading} 
+                />
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-8">
           <RecentProjects 
