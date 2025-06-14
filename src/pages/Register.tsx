@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Leaf, ArrowLeft, Users, Briefcase, Shield, Loader2 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const { signUp } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [userType, setUserType] = useState(searchParams.get("type") || "client");
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -40,6 +40,11 @@ const Register = () => {
     };
 
     const { error } = await signUp(formData.email, formData.password, userData);
+    
+    if (!error) {
+      // Redirecionar para o dashboard após registro bem-sucedido
+      navigate("/dashboard");
+    }
     
     setLoading(false);
   };

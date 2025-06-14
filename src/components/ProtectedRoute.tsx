@@ -12,10 +12,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requireAuth = true 
 }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, session } = useAuth();
   const location = useLocation();
 
-  console.log('ProtectedRoute - loading:', loading, 'user:', user, 'requireAuth:', requireAuth);
+  console.log('ProtectedRoute - loading:', loading, 'user:', user, 'session:', session, 'requireAuth:', requireAuth);
 
   if (loading) {
     return (
@@ -25,12 +25,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // Para rotas que requerem autenticação
   if (requireAuth && !user) {
     console.log('Redirecting to login - no user and auth required');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!requireAuth && user) {
+  // Para rotas que NÃO requerem autenticação (login, register, home)
+  if (!requireAuth && user && session) {
     console.log('Redirecting to dashboard - user exists and no auth required');
     return <Navigate to="/dashboard" replace />;
   }
