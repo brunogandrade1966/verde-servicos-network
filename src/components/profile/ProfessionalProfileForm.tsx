@@ -14,7 +14,7 @@ interface ProfessionalProfileData {
   name: string;
   email: string;
   phone?: string;
-  document: string;
+  document?: string;
   avatar_url?: string;
   bio?: string;
   // Informações de Contato
