@@ -46,6 +46,10 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
     navigate('/professionals');
   };
 
+  const handleApplyToProject = () => {
+    navigate(`/projects/${project.id}/apply`);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -72,6 +76,7 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
         </CardContent>
       </Card>
 
+      {/* Ações para Cliente */}
       {profile?.user_type === 'client' && (
         <Card>
           <CardHeader>
@@ -91,6 +96,26 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
             >
               Buscar Profissionais
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Ações para Profissional */}
+      {profile?.user_type === 'professional' && project.status === 'open' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Candidatar-se</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={handleApplyToProject}
+            >
+              Candidatar-se à Demanda
+            </Button>
+            <p className="text-sm text-gray-500 mt-2">
+              Envie sua proposta para esta demanda
+            </p>
           </CardContent>
         </Card>
       )}
