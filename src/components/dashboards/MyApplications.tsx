@@ -1,8 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Application {
@@ -32,15 +32,43 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
     }).format(amount);
   };
 
-  const getApplicationStatusBadge = (status: string) => {
-    const statusMap = {
-      pending: { label: 'Pendente', variant: 'outline' as const },
-      accepted: { label: 'Aceita', variant: 'default' as const },
-      rejected: { label: 'Rejeitada', variant: 'destructive' as const }
-    };
-    
-    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.pending;
-    return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="h-4 w-4 text-blue-500" />;
+      case 'accepted':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'rejected':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Pendente';
+      case 'accepted':
+        return 'Aceita';
+      case 'rejected':
+        return 'Rejeitada';
+      default:
+        return status;
+    }
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'secondary';
+      case 'accepted':
+        return 'default';
+      case 'rejected':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
   };
 
   if (loading) {
@@ -64,10 +92,9 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
               Nenhuma candidatura enviada
             </h3>
             <p className="text-gray-500 mb-4">
-              Comece a se candidatar a projetos para expandir seus negócios.
+              Você ainda não se candidatou a nenhum projeto.
             </p>
             <Button onClick={() => navigate('/projects')} className="bg-green-600 hover:bg-green-700">
-              <Search className="h-4 w-4 mr-2" />
               Buscar Projetos
             </Button>
           </CardContent>
@@ -81,23 +108,38 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Minhas Candidaturas</h2>
       <div className="space-y-4">
         {applications.slice(0, 5).map((application) => (
-          <Card key={application.id}>
+          <Card key={application.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{application.projects?.title}</CardTitle>
-                {getApplicationStatusBadge(application.status)}
+                <div>
+                  <CardTitle className="text-lg">{application.projects?.title}</CardTitle>
+                  <CardDescription className="mt-1">
+                    Enviada em {new Date(application.created_at).toLocaleDateString('pt-BR')}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {getStatusIcon(application.status)}
+                  <Badge variant={getStatusVariant(application.status) as any}>
+                    {getStatusLabel(application.status)}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">
-                  Enviada em {new Date(application.created_at).toLocaleDateString('pt-BR')}
-                </span>
+              <div className="flex justify-between items-center">
                 {application.proposed_price && (
-                  <span className="text-green-600 font-medium">
-                    {formatCurrency(application.proposed_price)}
+                  <span className="text-sm text-green-600 font-medium">
+                    Proposta: {formatCurrency(application.proposed_price)}
                   </span>
                 )}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/projects')}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Ver Projeto
+                </Button>
               </div>
             </CardContent>
           </Card>
