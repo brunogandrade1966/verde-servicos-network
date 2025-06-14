@@ -78,7 +78,8 @@ const FindProfessionals = () => {
             services(name, category)
           )
         `)
-        .eq('user_type', 'professional');
+        .eq('user_type', 'professional')
+        .neq('id', profile?.id || ''); // Exclude the authenticated professional
 
       if (error) {
         toast({
