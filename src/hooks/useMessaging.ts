@@ -24,8 +24,6 @@ export const useMessaging = (conversationId?: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const channelRef = useRef<any>(null);
-  const isSubscribedRef = useRef(false);
-  const conversationIdRef = useRef<string | null>(null);
 
   const fetchMessages = async () => {
     if (!conversationId) return;
@@ -146,42 +144,23 @@ export const useMessaging = (conversationId?: string) => {
     }
   };
 
-  const cleanupSubscription = async () => {
-    if (channelRef.current && isSubscribedRef.current) {
-      try {
-        await supabase.removeChannel(channelRef.current);
-      } catch (error) {
-        console.error('Error removing channel:', error);
-      }
-      channelRef.current = null;
-      isSubscribedRef.current = false;
-    }
-  };
-
   useEffect(() => {
     if (!conversationId) return;
 
-    // If the conversation ID changed, clean up the old subscription
-    if (conversationIdRef.current && conversationIdRef.current !== conversationId) {
-      cleanupSubscription();
-    }
-    
-    conversationIdRef.current = conversationId;
-
-    // If already subscribed for this conversation, don't subscribe again
-    if (isSubscribedRef.current && channelRef.current) {
-      fetchMessages();
-      return;
-    }
-
     fetchMessages();
 
-    // Clean up any existing subscription
-    cleanupSubscription();
+    // Remove any existing channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
 
-    // Create new subscription
-    const channel = supabase
-      .channel(`messages-${conversationId}-${Date.now()}`)
+    // Create new channel with unique name
+    const channelName = `messages-${conversationId}`;
+    const channel = supabase.channel(channelName);
+
+    // Set up event listeners before subscribing
+    channel
       .on(
         'postgres_changes',
         {
@@ -232,17 +211,15 @@ export const useMessaging = (conversationId?: string) => {
       )
       .subscribe((status) => {
         console.log('Messages subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          isSubscribedRef.current = true;
-        } else if (status === 'CLOSED') {
-          isSubscribedRef.current = false;
-        }
       });
 
     channelRef.current = channel;
 
     return () => {
-      cleanupSubscription();
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [conversationId, profile?.id]);
 

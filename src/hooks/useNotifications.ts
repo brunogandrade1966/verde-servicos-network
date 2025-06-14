@@ -22,8 +22,6 @@ export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const channelRef = useRef<any>(null);
-  const isSubscribedRef = useRef(false);
-  const profileIdRef = useRef<string | null>(null);
 
   const fetchNotifications = async () => {
     if (!profile?.id) return;
@@ -122,42 +120,23 @@ export const useNotifications = () => {
     }
   };
 
-  const cleanupSubscription = async () => {
-    if (channelRef.current && isSubscribedRef.current) {
-      try {
-        await supabase.removeChannel(channelRef.current);
-      } catch (error) {
-        console.error('Error removing channel:', error);
-      }
-      channelRef.current = null;
-      isSubscribedRef.current = false;
-    }
-  };
-
   useEffect(() => {
     if (!profile?.id) return;
 
-    // If the profile ID changed, clean up the old subscription
-    if (profileIdRef.current && profileIdRef.current !== profile.id) {
-      cleanupSubscription();
-    }
-    
-    profileIdRef.current = profile.id;
-
-    // If already subscribed for this profile, don't subscribe again
-    if (isSubscribedRef.current && channelRef.current) {
-      fetchNotifications();
-      return;
-    }
-
     fetchNotifications();
 
-    // Clean up any existing subscription
-    cleanupSubscription();
+    // Remove any existing channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
 
-    // Create new subscription
-    const channel = supabase
-      .channel(`notifications-${profile.id}-${Date.now()}`)
+    // Create new channel with unique name
+    const channelName = `notifications-${profile.id}`;
+    const channel = supabase.channel(channelName);
+
+    // Set up event listeners before subscribing
+    channel
       .on(
         'postgres_changes',
         {
@@ -195,17 +174,15 @@ export const useNotifications = () => {
       )
       .subscribe((status) => {
         console.log('Notifications subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          isSubscribedRef.current = true;
-        } else if (status === 'CLOSED') {
-          isSubscribedRef.current = false;
-        }
       });
 
     channelRef.current = channel;
 
     return () => {
-      cleanupSubscription();
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [profile?.id, toast]);
 
