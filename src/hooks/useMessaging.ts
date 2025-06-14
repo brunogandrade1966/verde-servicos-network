@@ -1,158 +1,226 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/hooks/useNotifications';
 
-interface Conversation {
+interface Message {
   id: string;
-  client_id: string;
-  professional_id: string;
-  updated_at: string;
-  client_profile?: {
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  read_at?: string;
+  sender?: {
+    id: string;
     name: string;
     avatar_url?: string;
   };
-  professional_profile?: {
-    name: string;
-    avatar_url?: string;
-  };
-  last_message?: {
-    content: string;
-    created_at: string;
-    sender_id: string;
-  };
-  unread_count?: number;
 }
 
-export const useMessaging = (userId: string | undefined) => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+export const useMessaging = (conversationId?: string) => {
+  const { profile } = useAuth();
+  const { createNotification } = useNotifications();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      fetchConversations();
-    }
-  }, [userId]);
+  const fetchMessages = async () => {
+    if (!conversationId) return;
 
-  const fetchConversations = async () => {
-    if (!userId) return;
-
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      // Buscar conversas onde o usuário participa
-      const { data: conversationsData, error: conversationsError } = await supabase
-        .from('conversations')
+      const { data, error } = await supabase
+        .from('messages')
         .select(`
-          id,
-          client_id,
-          professional_id,
-          updated_at,
-          client_profile:profiles!conversations_client_id_fkey(name, avatar_url),
-          professional_profile:profiles!conversations_professional_id_fkey(name, avatar_url)
+          *,
+          sender:profiles!messages_sender_id_fkey(
+            id,
+            name,
+            avatar_url
+          )
         `)
-        .or(`client_id.eq.${userId},professional_id.eq.${userId}`)
-        .order('updated_at', { ascending: false });
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
 
-      if (conversationsError) throw conversationsError;
+      if (error) {
+        console.error('Error fetching messages:', error);
+        return;
+      }
 
-      // Para cada conversa, buscar a última mensagem e contar não lidas
-      const conversationsWithDetails = await Promise.all(
-        (conversationsData || []).map(async (conversation) => {
-          // Última mensagem
-          const { data: lastMessage } = await supabase
-            .from('messages')
-            .select('content, created_at, sender_id')
-            .eq('conversation_id', conversation.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          // Contagem de mensagens não lidas (enviadas por outros para o usuário atual)
-          const { count: unreadCount } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conversation.id)
-            .neq('sender_id', userId)
-            .is('read_at', null);
-
-          return {
-            ...conversation,
-            last_message: lastMessage,
-            unread_count: unreadCount || 0
-          };
-        })
-      );
-
-      setConversations(conversationsWithDetails);
+      setMessages(data || []);
     } catch (error) {
-      console.error('Error fetching conversations:', error);
-      toast({
-        title: "Erro ao carregar conversas",
-        description: "Não foi possível carregar suas conversas.",
-        variant: "destructive"
-      });
+      console.error('Error fetching messages:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const createConversation = async (clientId: string, professionalId: string) => {
+  const sendMessage = async (content: string) => {
+    if (!conversationId || !profile?.id) return;
+
     try {
-      // Verificar se já existe uma conversa
-      const { data: existing } = await supabase
+      // Get conversation details to identify the recipient
+      const { data: conversation } = await supabase
         .from('conversations')
-        .select('id')
-        .eq('client_id', clientId)
-        .eq('professional_id', professionalId)
+        .select(`
+          client_id,
+          professional_id,
+          client:profiles!conversations_client_id_fkey(name),
+          professional:profiles!conversations_professional_id_fkey(name)
+        `)
+        .eq('id', conversationId)
         .single();
 
-      if (existing) {
-        return existing;
+      if (!conversation) return;
+
+      // Insert the message
+      const { data: message, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: profile.id,
+          content
+        })
+        .select(`
+          *,
+          sender:profiles!messages_sender_id_fkey(
+            id,
+            name,
+            avatar_url
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error('Error sending message:', error);
+        return;
       }
 
-      // Criar nova conversa
-      const { data, error } = await supabase
-        .from('conversations')
-        .insert({
-          client_id: clientId,
-          professional_id: professionalId
-        })
-        .select()
-        .single();
+      // Determine recipient
+      const recipientId = profile.id === conversation.client_id 
+        ? conversation.professional_id 
+        : conversation.client_id;
 
-      if (error) throw error;
+      const senderName = profile.name || 'Usuário';
+      const recipientName = profile.id === conversation.client_id
+        ? conversation.professional?.name
+        : conversation.client?.name;
 
-      toast({
-        title: "Conversa criada!",
-        description: "Você pode agora trocar mensagens."
-      });
+      // Create notification for recipient
+      if (recipientId) {
+        await createNotification(
+          recipientId,
+          'message',
+          'Nova mensagem',
+          `${senderName} enviou uma mensagem: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+          { conversationId, messageId: message.id }
+        );
+      }
 
-      // Recarregar conversas
-      await fetchConversations();
-      
-      return data;
+      return message;
     } catch (error) {
-      console.error('Error creating conversation:', error);
-      toast({
-        title: "Erro ao criar conversa",
-        description: "Não foi possível iniciar a conversa.",
-        variant: "destructive"
-      });
-      return null;
+      console.error('Error sending message:', error);
     }
   };
 
-  const getTotalUnreadCount = () => {
-    return conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0);
+  const markAsRead = async (messageId: string) => {
+    try {
+      await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', messageId)
+        .is('read_at', null);
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
   };
 
+  const markConversationAsRead = async () => {
+    if (!conversationId || !profile?.id) return;
+
+    try {
+      await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', profile.id)
+        .is('read_at', null);
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+    }
+  };
+
+  // Subscribe to real-time messages
+  useEffect(() => {
+    if (!conversationId) return;
+
+    fetchMessages();
+
+    const channel = supabase
+      .channel(`messages-${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        async (payload) => {
+          const newMessage = payload.new;
+          
+          // Fetch sender info
+          const { data: sender } = await supabase
+            .from('profiles')
+            .select('id, name, avatar_url')
+            .eq('id', newMessage.sender_id)
+            .single();
+
+          const messageWithSender = {
+            ...newMessage,
+            sender
+          } as Message;
+
+          setMessages(prev => [...prev, messageWithSender]);
+
+          // Auto-mark as read if the message is from another user and we're viewing the conversation
+          if (newMessage.sender_id !== profile?.id) {
+            setTimeout(() => markAsRead(newMessage.id), 1000);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        (payload) => {
+          const updatedMessage = payload.new;
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === updatedMessage.id 
+                ? { ...msg, ...updatedMessage }
+                : msg
+            )
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, profile?.id]);
+
   return {
-    conversations,
+    messages,
     loading,
-    createConversation,
-    refreshConversations: fetchConversations,
-    totalUnreadCount: getTotalUnreadCount()
+    sendMessage,
+    markAsRead,
+    markConversationAsRead,
+    fetchMessages
   };
 };
