@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,7 +49,7 @@ const ClientDashboard = () => {
 
       if (error) {
         toast({
-          title: "Erro ao carregar projetos",
+          title: "Erro ao carregar demandas",
           description: error.message,
           variant: "destructive"
         });
@@ -135,7 +136,7 @@ const ClientDashboard = () => {
               <CardTitle className="text-2xl font-bold text-green-600">
                 {projects.length}
               </CardTitle>
-              <CardDescription>Projetos Criados</CardDescription>
+              <CardDescription>Demandas Criadas</CardDescription>
             </CardHeader>
           </Card>
           <Card>
@@ -143,7 +144,7 @@ const ClientDashboard = () => {
               <CardTitle className="text-2xl font-bold text-blue-600">
                 {projects.filter(p => p.status === 'open').length}
               </CardTitle>
-              <CardDescription>Projetos Abertos</CardDescription>
+              <CardDescription>Demandas Abertas</CardDescription>
             </CardHeader>
           </Card>
           <Card>
@@ -159,7 +160,7 @@ const ClientDashboard = () => {
               <CardTitle className="text-2xl font-bold text-purple-600">
                 {projects.filter(p => p.status === 'completed').length}
               </CardTitle>
-              <CardDescription>Concluídos</CardDescription>
+              <CardDescription>Concluídas</CardDescription>
             </CardHeader>
           </Card>
         </div>
@@ -168,11 +169,11 @@ const ClientDashboard = () => {
         <div className="flex space-x-4 mb-8">
           <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
             <Plus className="h-4 w-4 mr-2" />
-            Criar Projeto
+            Criar Demanda
           </Button>
           <Button variant="outline" onClick={() => navigate('/projects')}>
             <Search className="h-4 w-4 mr-2" />
-            Buscar Projetos
+            Buscar Demandas
           </Button>
           <Button variant="outline" onClick={() => navigate('/professionals')}>
             <Users className="h-4 w-4 mr-2" />
@@ -182,7 +183,7 @@ const ClientDashboard = () => {
 
         {/* My Projects */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Meus Projetos</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Minhas Demandas</h2>
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -191,14 +192,14 @@ const ClientDashboard = () => {
             <Card>
               <CardContent className="text-center py-8">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Nenhum projeto criado
+                  Nenhuma demanda criada
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Comece criando seu primeiro projeto ambiental.
+                  Comece criando sua primeira demanda ambiental.
                 </p>
                 <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
                   <Plus className="h-4 w-4 mr-2" />
-                  Criar Primeiro Projeto
+                  Criar Primeira Demanda
                 </Button>
               </CardContent>
             </Card>
@@ -237,7 +238,7 @@ const ClientDashboard = () => {
                       </div>
                       <Button variant="outline" size="sm" onClick={() => navigate(`/projects/${project.id}`)}>
                         <Eye className="h-4 w-4 mr-2" />
-                        Ver Projeto
+                        Ver Demanda
                       </Button>
                     </div>
                   </CardContent>
