@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Application {
   id: string;
@@ -12,6 +15,7 @@ interface Application {
   estimated_duration?: string;
   created_at: string;
   profiles: {
+    id: string;
     name: string;
     bio?: string;
     avatar_url?: string;
@@ -19,15 +23,59 @@ interface Application {
 }
 
 interface Profile {
+  id?: string;
   user_type?: string;
 }
 
 interface ProjectApplicationsProps {
   applications: Application[];
   profile: Profile | null;
+  onApplicationUpdate?: () => void;
 }
 
-const ProjectApplications = ({ applications, profile }: ProjectApplicationsProps) => {
+const ProjectApplications = ({ applications, profile, onApplicationUpdate }: ProjectApplicationsProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleViewProfile = (professionalId: string) => {
+    navigate(`/professionals/${professionalId}`);
+  };
+
+  const handleAcceptApplication = async (applicationId: string, professionalName: string) => {
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({ status: 'accepted' })
+        .eq('id', applicationId);
+
+      if (error) {
+        toast({
+          title: "Erro ao aceitar candidatura",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Candidatura aceita!",
+        description: `A candidatura de ${professionalName} foi aceita com sucesso.`
+      });
+
+      // Atualizar a lista de candidaturas
+      if (onApplicationUpdate) {
+        onApplicationUpdate();
+      }
+    } catch (error) {
+      console.error('Error accepting application:', error);
+      toast({
+        title: "Erro ao aceitar candidatura",
+        description: "Não foi possível aceitar a candidatura. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const formatCurrency = (amount?: number) => {
     if (!amount) return 'Não informado';
     return new Intl.NumberFormat('pt-BR', {
@@ -67,7 +115,9 @@ const ProjectApplications = ({ applications, profile }: ProjectApplicationsProps
                     </div>
                   </div>
                   <Badge variant={application.status === 'pending' ? 'secondary' : 'default'}>
-                    {application.status === 'pending' ? 'Pendente' : application.status}
+                    {application.status === 'pending' ? 'Pendente' : 
+                     application.status === 'accepted' ? 'Aceita' : 
+                     application.status === 'rejected' ? 'Rejeitada' : application.status}
                   </Badge>
                 </div>
 
@@ -86,14 +136,24 @@ const ProjectApplications = ({ applications, profile }: ProjectApplicationsProps
                       </span>
                     )}
                   </div>
-                  {profile?.user_type === 'client' && application.status === 'pending' && (
+                  {profile?.user_type === 'client' && (
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleViewProfile(application.profiles.id)}
+                      >
                         Ver Perfil
                       </Button>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                        Aceitar
-                      </Button>
+                      {application.status === 'pending' && (
+                        <Button 
+                          size="sm" 
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => handleAcceptApplication(application.id, application.profiles.name)}
+                        >
+                          Aceitar
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

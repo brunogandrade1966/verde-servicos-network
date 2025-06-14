@@ -81,7 +81,7 @@ const ProjectDetails = () => {
             status,
             estimated_duration,
             created_at,
-            profiles(name, bio, avatar_url)
+            profiles(id, name, bio, avatar_url)
           )
         `)
         .eq('id', id)
@@ -111,6 +111,10 @@ const ProjectDetails = () => {
 
   const handleStatusUpdate = () => {
     fetchProject(); // Recarregar dados do projeto após atualização de status
+  };
+
+  const handleApplicationUpdate = () => {
+    fetchProject(); // Recarregar dados do projeto após atualização de candidatura
   };
 
   const isOwner = profile?.id === project?.client_id;
@@ -182,7 +186,11 @@ const ProjectDetails = () => {
 
             {/* Só mostrar candidaturas se o usuário for o cliente dono da demanda */}
             {profile?.user_type === 'client' && profile?.id === project.client_id && (
-              <ProjectApplications applications={project.applications} profile={profile} />
+              <ProjectApplications 
+                applications={project.applications} 
+                profile={profile}
+                onApplicationUpdate={handleApplicationUpdate}
+              />
             )}
           </div>
           
