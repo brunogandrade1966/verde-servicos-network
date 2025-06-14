@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Leaf, ArrowLeft, Save, DollarSign, Calendar, MapPin } from 'lucide-react';
+import { Leaf, ArrowLeft, Save, DollarSign, Calendar, MapPin, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -115,12 +115,12 @@ const CreateProject = () => {
         budget_max: formData.budget_max ? parseFloat(formData.budget_max) : null,
         deadline: formData.deadline || null,
         location: formData.location.trim() || null,
-        status: isDraft ? 'draft' : 'open'
+        status: (isDraft ? 'draft' : 'open') as 'draft' | 'open'
       };
 
       const { data, error } = await supabase
         .from('projects')
-        .insert([projectData])
+        .insert(projectData)
         .select()
         .single();
 
