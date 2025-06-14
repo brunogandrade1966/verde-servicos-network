@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,11 +55,10 @@ interface Review {
 const ProfessionalProfileView = () => {
   const { professionalId } = useParams<{ professionalId: string }>();
   const { toast } = useToast();
-  const { profile: currentUser, startConversation } = useAuth();
+  const { profile: currentUser } = useAuth();
   const [professional, setProfessional] = useState<ProfessionalProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [startingConversation, setStartingConversation] = useState(false);
 
   useEffect(() => {
     fetchProfessionalProfile();
@@ -104,7 +104,7 @@ const ProfessionalProfileView = () => {
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('professional_id', professionalId)
+        .eq('reviewed_id', professionalId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -121,23 +121,10 @@ const ProfessionalProfileView = () => {
   const handleStartConversation = async () => {
     if (!currentUser || !professional) return;
 
-    setStartingConversation(true);
-    try {
-      await startConversation(currentUser.id, professional.id);
-      toast({
-        title: "Conversa iniciada",
-        description: "Você pode agora enviar mensagens para este profissional.",
-      });
-    } catch (error) {
-      console.error("Error starting conversation:", error);
-      toast({
-        title: "Erro ao iniciar conversa",
-        description: "Ocorreu um erro ao iniciar a conversa. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setStartingConversation(false);
-    }
+    toast({
+      title: "Funcionalidade em desenvolvimento",
+      description: "O sistema de mensagens será implementado em breve.",
+    });
   };
   
   if (loading) {
@@ -210,9 +197,9 @@ const ProfessionalProfileView = () => {
                       
                       <div className="flex space-x-3 mt-4 md:mt-0">
                         {currentUser?.user_type === 'client' && (
-                          <Button onClick={handleStartConversation} disabled={startingConversation}>
+                          <Button onClick={handleStartConversation}>
                             <MessageCircle className="h-4 w-4 mr-2" />
-                            {startingConversation ? 'Iniciando...' : 'Enviar Mensagem'}
+                            Enviar Mensagem
                           </Button>
                         )}
                       </div>

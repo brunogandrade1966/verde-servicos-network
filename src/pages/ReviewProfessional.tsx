@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,7 +71,7 @@ const ReviewProfessional = () => {
             .from('reviews')
             .select('*')
             .eq('project_id', projectId)
-            .eq('professional_id', professionalId)
+            .eq('reviewed_id', professionalId)
             .eq('reviewer_id', profile.id)
             .single();
 
@@ -105,15 +106,13 @@ const ReviewProfessional = () => {
 
       const { error } = await supabase
         .from('reviews')
-        .insert([
-          {
-            project_id: projectId,
-            professional_id: professionalId,
-            reviewer_id: profile.id,
-            rating: rating,
-            comment: comment,
-          },
-        ]);
+        .insert({
+          project_id: projectId,
+          reviewed_id: professionalId,
+          reviewer_id: profile.id,
+          rating: rating,
+          comment: comment,
+        });
 
       if (error) {
         throw new Error(error.message);
