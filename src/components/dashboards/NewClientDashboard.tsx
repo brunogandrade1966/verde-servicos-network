@@ -15,7 +15,8 @@ import {
   Clock, 
   AlertCircle,
   Star,
-  TrendingUp
+  TrendingUp,
+  Briefcase
 } from 'lucide-react';
 
 interface DashboardStats {
