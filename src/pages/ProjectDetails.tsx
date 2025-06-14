@@ -115,6 +115,7 @@ const ProjectDetails = () => {
 
   const isOwner = profile?.id === project?.client_id;
   const isContractedStatus = project?.status && ['in_progress', 'completed'].includes(project.status);
+  const canReview = isOwner && project?.status === 'completed';
 
   // Criar timeline mock - em uma implementação completa, isso viria do banco de dados
   const createTimelineEvents = (project: Project) => {
@@ -187,6 +188,24 @@ const ProjectDetails = () => {
           
           <div className="space-y-6">
             <ProjectSidebar project={project} profile={profile} />
+            
+            {/* Botão de avaliação para projetos concluídos */}
+            {canReview && (
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-gray-900 mb-2">Projeto Concluído</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Avalie o trabalho realizado pelo profissional
+                  </p>
+                  <Button 
+                    onClick={() => navigate(`/review/${project.id}`)}
+                    className="w-full"
+                  >
+                    Avaliar Profissional
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
             
             {/* Atualizador de status */}
             {isContractedStatus && (

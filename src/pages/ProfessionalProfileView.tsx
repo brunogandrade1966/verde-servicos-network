@@ -4,11 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
+import { useReviews } from '@/hooks/useReviews';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Leaf, ArrowLeft, Star, MapPin, Clock, DollarSign, GraduationCap, FileText, Award, MessageCircle } from 'lucide-react';
+import { Leaf, ArrowLeft, MapPin, Clock, DollarSign, GraduationCap, FileText, Award, MessageCircle } from 'lucide-react';
+import RatingDisplay from '@/components/reviews/RatingDisplay';
+import ReviewsList from '@/components/reviews/ReviewsList';
 
 interface Professional {
   id: string;
@@ -46,6 +49,7 @@ const ProfessionalProfileView = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { createConversation } = useConversations(profile?.id);
+  const { reviews, loading: reviewsLoading, averageRating, totalReviews } = useReviews(id);
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -233,6 +237,16 @@ const ProfessionalProfileView = () => {
                     {professional.academic_title && (
                       <p className="text-lg text-gray-700 mb-2">{professional.academic_title}</p>
                     )}
+                    
+                    {/* Rating Display */}
+                    <div className="mb-3">
+                      <RatingDisplay 
+                        rating={averageRating} 
+                        totalReviews={totalReviews} 
+                        size="md"
+                      />
+                    </div>
+
                     <div className="flex items-center space-x-2 mb-3">
                       <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -364,6 +378,28 @@ const ProfessionalProfileView = () => {
               </Card>
             )}
           </div>
+
+          {/* Reviews Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Award className="h-5 w-5 mr-2 text-yellow-600" />
+                Avaliações ({totalReviews})
+              </CardTitle>
+              {totalReviews > 0 && (
+                <div className="mt-2">
+                  <RatingDisplay 
+                    rating={averageRating} 
+                    totalReviews={totalReviews} 
+                    size="lg"
+                  />
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <ReviewsList reviews={reviews} loading={reviewsLoading} />
+            </CardContent>
+          </Card>
 
           {/* Sidebar */}
           <div className="space-y-6">
