@@ -17,7 +17,7 @@ const ProjectDetailsHeader = () => {
             </Button>
             <Leaf className="h-8 w-8 text-green-600" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Detalhes do Projeto</h1>
+              <h1 className="text-xl font-bold text-gray-900">Detalhes da Demanda</h1>
               <p className="text-sm text-gray-500">Informações e candidaturas</p>
             </div>
           </div>
