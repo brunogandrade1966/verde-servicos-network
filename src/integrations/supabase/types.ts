@@ -65,6 +65,7 @@ export type Database = {
           client_id: string
           created_at: string
           id: string
+          partnership_demand_id: string | null
           professional_id: string
           updated_at: string
         }
@@ -72,6 +73,7 @@ export type Database = {
           client_id: string
           created_at?: string
           id?: string
+          partnership_demand_id?: string | null
           professional_id: string
           updated_at?: string
         }
@@ -79,6 +81,7 @@ export type Database = {
           client_id?: string
           created_at?: string
           id?: string
+          partnership_demand_id?: string | null
           professional_id?: string
           updated_at?: string
         }
@@ -88,6 +91,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_partnership_demand_id_fkey"
+            columns: ["partnership_demand_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_demands"
             referencedColumns: ["id"]
           },
           {

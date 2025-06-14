@@ -45,7 +45,7 @@ export const useConversations = (userId: string | undefined) => {
           *,
           client:profiles!conversations_client_id_fkey(id, name, avatar_url),
           professional:profiles!conversations_professional_id_fkey(id, name, avatar_url),
-          partnership_demands(title)
+          partnership_demands!left(title)
         `)
         .or(`client_id.eq.${userId},professional_id.eq.${userId}`)
         .order('updated_at', { ascending: false });
