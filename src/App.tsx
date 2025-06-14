@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,8 @@ import ProjectDetails from "./pages/ProjectDetails";
 import BrowseProjects from "./pages/BrowseProjects";
 import ApplyToProject from "./pages/ApplyToProject";
 import FindProfessionals from "./pages/FindProfessionals";
+import ProfessionalProfile from "./pages/ProfessionalProfile";
+import ManageServices from "./pages/ManageServices";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -76,10 +77,42 @@ const App = () => (
               } 
             />
             <Route 
+              path="/projects" 
+              element={
+                <ProtectedRoute>
+                  <BrowseProjects />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/apply" 
+              element={
+                <ProtectedRoute>
+                  <ApplyToProject />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/professionals" 
               element={
                 <ProtectedRoute>
                   <FindProfessionals />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfessionalProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-services" 
+              element={
+                <ProtectedRoute>
+                  <ManageServices />
                 </ProtectedRoute>
               } 
             />

@@ -137,6 +137,10 @@ const ProfessionalDashboard = () => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">Olá, {profile?.name}</span>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
+                <Star className="h-4 w-4 mr-2" />
+                Perfil
+              </Button>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
@@ -197,6 +201,10 @@ const ProfessionalDashboard = () => {
           <Button variant="outline" onClick={() => navigate('/my-services')}>
             <Briefcase className="h-4 w-4 mr-2" />
             Meus Serviços
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/profile')}>
+            <Star className="h-4 w-4 mr-2" />
+            Meu Perfil
           </Button>
         </div>
 
