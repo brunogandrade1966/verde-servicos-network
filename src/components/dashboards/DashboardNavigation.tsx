@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMessaging } from '@/hooks/useMessaging';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { 
   Home, 
   Search, 
@@ -20,7 +20,7 @@ const DashboardNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useAuth();
-  const { totalUnreadCount } = useMessaging(profile?.id);
+  const { unreadCount } = useUnreadMessages();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -68,7 +68,7 @@ const DashboardNavigation = () => {
       icon: MessageCircle,
       label: 'Mensagens',
       show: true,
-      badge: totalUnreadCount > 0 ? totalUnreadCount : undefined
+      badge: unreadCount > 0 ? unreadCount : undefined
     },
     {
       path: '/profile',

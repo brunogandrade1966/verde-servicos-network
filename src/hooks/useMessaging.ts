@@ -102,9 +102,6 @@ export const useMessaging = (conversationId?: string) => {
         : conversation.client_id;
 
       const senderName = profile.name || 'Usuário';
-      const recipientName = profile.id === conversation.client_id
-        ? conversation.professional?.name
-        : conversation.client?.name;
 
       // Create notification for recipient
       if (recipientId) {
