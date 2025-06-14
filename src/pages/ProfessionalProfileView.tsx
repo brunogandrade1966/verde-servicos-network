@@ -1,15 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { useConversations } from '@/hooks/useConversations';
 import { useReviews } from '@/hooks/useReviews';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Leaf, ArrowLeft, MapPin, Clock, DollarSign, GraduationCap, FileText, Award, MessageCircle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { 
+  MapPin, 
+  Star, 
+  MessageCircle, 
+  ArrowLeft, 
+  Calendar,
+  DollarSign,
+  User,
+  Mail,
+  Phone
+} from 'lucide-react';
+import DashboardNavigation from '@/components/dashboards/DashboardNavigation';
 import RatingDisplay from '@/components/reviews/RatingDisplay';
 import ReviewsList from '@/components/reviews/ReviewsList';
 

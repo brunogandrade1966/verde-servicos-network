@@ -1,19 +1,21 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfessionalProfile from './pages/ProfessionalProfile';
 import ProfessionalProfileView from './pages/ProfessionalProfileView';
-import Professionals from './pages/Professionals';
+import FindProfessionals from './pages/FindProfessionals';
 import ProjectDetails from './pages/ProjectDetails';
 import CreateProject from './pages/CreateProject';
-import Projects from './pages/Projects';
+import BrowseProjects from './pages/BrowseProjects';
 import ContractedProjects from './pages/ContractedProjects';
 import Messages from './pages/Messages';
-import AdminServices from './pages/AdminServices';
+import ManageServices from './pages/ManageServices';
 import Partnerships from './pages/Partnerships';
 import { Toaster } from '@/components/ui/toaster';
 import ReviewProfessional from './pages/ReviewProfessional';
@@ -56,7 +58,7 @@ function App() {
                 path="/professionals"
                 element={
                   <ProtectedRoute>
-                    <Professionals />
+                    <FindProfessionals />
                   </ProtectedRoute>
                 }
               />
@@ -80,7 +82,7 @@ function App() {
                 path="/projects"
                 element={
                   <ProtectedRoute>
-                    <Projects />
+                    <BrowseProjects />
                   </ProtectedRoute>
                 }
               />
@@ -104,7 +106,7 @@ function App() {
                 path="/admin/services"
                 element={
                   <ProtectedRoute>
-                    <AdminServices />
+                    <ManageServices />
                   </ProtectedRoute>
                 }
               />
