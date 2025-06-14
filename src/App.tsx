@@ -16,6 +16,7 @@ import BrowseProjects from "./pages/BrowseProjects";
 import ApplyToProject from "./pages/ApplyToProject";
 import FindProfessionals from "./pages/FindProfessionals";
 import ProfessionalProfile from "./pages/ProfessionalProfile";
+import ProfessionalProfileView from "./pages/ProfessionalProfileView";
 import ManageServices from "./pages/ManageServices";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -107,6 +108,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <FindProfessionals />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/professionals/:id" 
+              element={
+                <ProtectedRoute>
+                  <ProfessionalProfileView />
                 </ProtectedRoute>
               } 
             />

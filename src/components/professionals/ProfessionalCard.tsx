@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Professional {
   id: string;
@@ -25,6 +26,17 @@ interface ProfessionalCardProps {
 }
 
 const ProfessionalCard = ({ professional }: ProfessionalCardProps) => {
+  const navigate = useNavigate();
+
+  const handleViewProfile = () => {
+    navigate(`/professionals/${professional.id}`);
+  };
+
+  const handleHire = () => {
+    // TODO: Implement hiring functionality
+    console.log('Hiring professional:', professional.id);
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -76,10 +88,10 @@ const ProfessionalCard = ({ professional }: ProfessionalCardProps) => {
               )}
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleViewProfile}>
                 Ver Perfil
               </Button>
-              <Button size="sm" className="bg-green-600 hover:bg-green-700">
+              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleHire}>
                 Contratar
               </Button>
             </div>
