@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -27,9 +28,21 @@ function App() {
         <Router>
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={<Login />} />
+              <Route path="/" element={
+                <ProtectedRoute requireAuth={false}>
+                  <Index />
+                </ProtectedRoute>
+              } />
+              <Route path="/login" element={
+                <ProtectedRoute requireAuth={false}>
+                  <Login />
+                </ProtectedRoute>
+              } />
+              <Route path="/register" element={
+                <ProtectedRoute requireAuth={false}>
+                  <Register />
+                </ProtectedRoute>
+              } />
               <Route
                 path="/dashboard"
                 element={

@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading, session } = useAuth();
   const location = useLocation();
 
-  console.log('ProtectedRoute - loading:', loading, 'user:', user, 'session:', session, 'requireAuth:', requireAuth);
+  console.log('ProtectedRoute - loading:', loading, 'user:', user, 'session:', session, 'requireAuth:', requireAuth, 'path:', location.pathname);
 
   if (loading) {
     return (
@@ -32,8 +32,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Para rotas que NÃO requerem autenticação (login, register, home)
-  if (!requireAuth && user && session) {
-    console.log('Redirecting to dashboard - user exists and no auth required');
+  // Só redirecionar se estiver nas páginas de login/register e o usuário estiver autenticado
+  if (!requireAuth && user && session && (location.pathname === '/login' || location.pathname === '/register')) {
+    console.log('Redirecting to dashboard - user exists and trying to access login/register');
     return <Navigate to="/dashboard" replace />;
   }
 

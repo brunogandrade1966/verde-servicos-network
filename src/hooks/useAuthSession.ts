@@ -13,8 +13,16 @@ export const useAuthSession = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
+        
+        // Limpar estado se logout ou sessão expirada
+        if (event === 'SIGNED_OUT' || !session) {
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+        
         setLoading(false);
       }
     );

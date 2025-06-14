@@ -1,4 +1,3 @@
-
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -109,15 +108,28 @@ export const useAuthActions = (user: User | null, fetchUserProfile: (userId: str
   };
 
   const signOut = async () => {
-    console.log('Signing out user');
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Signout error:', error);
-      toast({
-        title: "Erro ao sair",
-        description: error.message,
-        variant: "destructive"
-      });
+    try {
+      console.log('Signing out user');
+      // Não mostrar erro se a sessão já expirou
+      const { error } = await supabase.auth.signOut();
+      
+      // Só mostrar erro se não for relacionado a sessão faltando
+      if (error && !error.message.includes('Auth session missing')) {
+        console.error('Signout error:', error);
+        toast({
+          title: "Erro ao sair",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        console.log('Logout successful');
+        // Redirecionar para a landing page após logout bem-sucedido
+        window.location.href = '/';
+      }
+    } catch (error: any) {
+      console.error('Signout exception:', error);
+      // Mesmo em caso de erro, redirecionar para a home
+      window.location.href = '/';
     }
   };
 
