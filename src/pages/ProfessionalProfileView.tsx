@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Leaf, ArrowLeft, Star, MapPin, Clock, DollarSign } from 'lucide-react';
+import { Leaf, ArrowLeft, Star, MapPin, Clock, DollarSign, GraduationCap, FileText, Award } from 'lucide-react';
 
 interface Professional {
   id: string;
@@ -23,6 +23,9 @@ interface Professional {
   specializations?: string;
   certifications?: string;
   education?: string;
+  academic_title?: string;
+  professional_entity?: string;
+  registration_number?: string;
   linkedin_url?: string;
   portfolio_url?: string;
   professional_services: Array<{
@@ -67,6 +70,9 @@ const ProfessionalProfileView = () => {
           specializations,
           certifications,
           education,
+          academic_title,
+          professional_entity,
+          registration_number,
           linkedin_url,
           portfolio_url,
           professional_services(
@@ -184,6 +190,9 @@ const ProfessionalProfileView = () => {
                   </Avatar>
                   <div className="flex-1">
                     <CardTitle className="text-2xl mb-2">{professional.name}</CardTitle>
+                    {professional.academic_title && (
+                      <p className="text-lg text-gray-700 mb-2">{professional.academic_title}</p>
+                    )}
                     <div className="flex items-center space-x-2 mb-3">
                       <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -225,43 +234,92 @@ const ProfessionalProfileView = () => {
               )}
             </Card>
 
-            {/* Services */}
+            {/* Serviços Habilitados */}
             {professional.professional_services.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Especialidades</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <Award className="h-5 w-5 mr-2 text-green-600" />
+                    Serviços Habilitados
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {professional.professional_services.map((ps) => (
-                      <Badge key={ps.id} variant="outline">
-                        {ps.services.name}
-                      </Badge>
+                      <div key={ps.id} className="border rounded-lg p-3 bg-gray-50">
+                        <h4 className="font-medium text-gray-900 mb-1">{ps.services.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Categoria: {ps.services.category}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {ps.experience_years && (
+                            <Badge variant="outline" className="text-xs">
+                              {ps.experience_years} anos
+                            </Badge>
+                          )}
+                          {ps.price_range && (
+                            <Badge variant="outline" className="text-xs">
+                              {ps.price_range}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Education & Certifications */}
-            {(professional.education || professional.certifications) && (
+            {/* Formação Acadêmica */}
+            {professional.education && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Formação e Certificações</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
+                    Formação Acadêmica
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {professional.education && (
+                <CardContent>
+                  <p className="text-gray-700">{professional.education}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Registro Profissional */}
+            {(professional.professional_entity || professional.registration_number) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="h-5 w-5 mr-2 text-purple-600" />
+                    Registro Profissional
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {professional.professional_entity && (
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-1">Formação</h4>
-                      <p className="text-gray-600">{professional.education}</p>
+                      <h4 className="font-medium text-gray-900 mb-1">Entidade de Classe</h4>
+                      <p className="text-gray-700">{professional.professional_entity}</p>
                     </div>
                   )}
-                  {professional.certifications && (
+                  {professional.registration_number && (
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-1">Certificações</h4>
-                      <p className="text-gray-600">{professional.certifications}</p>
+                      <h4 className="font-medium text-gray-900 mb-1">Número de Registro</h4>
+                      <p className="text-gray-700">{professional.registration_number}</p>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Certificações */}
+            {professional.certifications && professional.certifications !== '[]' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Award className="h-5 w-5 mr-2 text-orange-600" />
+                    Certificações
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700">{professional.certifications}</p>
                 </CardContent>
               </Card>
             )}
