@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,9 @@ interface ClientProfileData {
   company_size?: string;
   industry?: string;
   address?: string;
+  address_number?: string;
+  address_complement?: string;
+  neighborhood?: string;
   city?: string;
   state?: string;
   postal_code?: string;
@@ -51,6 +55,7 @@ const ClientProfileForm = ({ profile, userId, onSave, loading }: ClientProfileFo
     setFormData(prev => ({
       ...prev,
       address: address.address,
+      neighborhood: address.neighborhood,
       city: address.city,
       state: address.state
     }));
@@ -252,12 +257,39 @@ const ClientProfileForm = ({ profile, userId, onSave, loading }: ClientProfileFo
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <Label htmlFor="address">Endereço</Label>
+              <Label htmlFor="address">Logradouro</Label>
               <Input
                 id="address"
                 value={formData.address || ''}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                placeholder="Rua, número, bairro"
+                placeholder="Rua, avenida, etc."
+              />
+            </div>
+            <div>
+              <Label htmlFor="address_number">Número</Label>
+              <Input
+                id="address_number"
+                value={formData.address_number || ''}
+                onChange={(e) => handleInputChange('address_number', e.target.value)}
+                placeholder="123"
+              />
+            </div>
+            <div>
+              <Label htmlFor="address_complement">Complemento</Label>
+              <Input
+                id="address_complement"
+                value={formData.address_complement || ''}
+                onChange={(e) => handleInputChange('address_complement', e.target.value)}
+                placeholder="Apto 45, Bloco B, etc."
+              />
+            </div>
+            <div>
+              <Label htmlFor="neighborhood">Bairro</Label>
+              <Input
+                id="neighborhood"
+                value={formData.neighborhood || ''}
+                onChange={(e) => handleInputChange('neighborhood', e.target.value)}
+                placeholder="Nome do bairro"
               />
             </div>
             <div>
