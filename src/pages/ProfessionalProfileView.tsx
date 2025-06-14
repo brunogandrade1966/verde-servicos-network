@@ -1,113 +1,77 @@
-
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useConversations } from '@/hooks/useConversations';
-import { useReviews } from '@/hooks/useReviews';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { 
   MapPin, 
-  Star, 
-  MessageCircle, 
-  ArrowLeft, 
-  Calendar,
-  DollarSign,
-  User,
-  Mail,
-  Phone,
-  Leaf,
-  Clock,
+  Phone, 
+  Mail, 
+  Globe, 
+  Linkedin, 
+  GraduationCap, 
   Award,
-  GraduationCap,
-  FileText
+  Star,
+  MessageCircle
 } from 'lucide-react';
-import DashboardNavigation from '@/components/dashboards/DashboardNavigation';
-import RatingDisplay from '@/components/reviews/RatingDisplay';
-import ReviewsList from '@/components/reviews/ReviewsList';
+import { useAuth } from '@/contexts/AuthContext';
+import ClientLayout from '@/components/layout/ClientLayout';
 
-interface Professional {
+interface ProfessionalProfile {
   id: string;
   name: string;
-  bio?: string;
+  email: string;
   avatar_url?: string;
+  bio?: string;
+  area_of_expertise?: string;
+  academic_title?: string;
   city?: string;
   state?: string;
-  phone?: string;
-  email: string;
   experience_years?: number;
-  hourly_rate?: number;
-  specializations?: string;
-  certifications?: string;
+  skills?: string[];
   education?: string;
-  academic_title?: string;
+  website?: string;
+  linkedin_url?: string;
+  phone?: string;
   professional_entity?: string;
   registration_number?: string;
-  linkedin_url?: string;
-  portfolio_url?: string;
-  professional_services: Array<{
-    id: string;
-    price_range?: string;
-    experience_years?: number;
-    services: {
-      name: string;
-      category: string;
-    };
-  }>;
+  specializations?: string[];
+  hourly_rate?: number;
+  availability?: string;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment?: string;
+  created_at: string;
 }
 
 const ProfessionalProfileView = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { professionalId } = useParams<{ professionalId: string }>();
   const { toast } = useToast();
-  const { profile } = useAuth();
-  const { createConversation } = useConversations(profile?.id);
-  const { reviews, loading: reviewsLoading, averageRating, totalReviews } = useReviews(id);
-  const [professional, setProfessional] = useState<Professional | null>(null);
+  const { profile: currentUser, startConversation } = useAuth();
+  const [professional, setProfessional] = useState<ProfessionalProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [startingConversation, setStartingConversation] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      fetchProfessional();
-    }
-  }, [id]);
+    fetchProfessionalProfile();
+    fetchReviews();
+  }, [professionalId]);
 
-  const fetchProfessional = async () => {
+  const fetchProfessionalProfile = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          name,
-          bio,
-          avatar_url,
-          city,
-          state,
-          phone,
-          email,
-          experience_years,
-          hourly_rate,
-          specializations,
-          certifications,
-          education,
-          academic_title,
-          professional_entity,
-          registration_number,
-          linkedin_url,
-          portfolio_url,
-          professional_services(
-            id,
-            price_range,
-            experience_years,
-            services(name, category)
-          )
-        `)
-        .eq('id', id)
+        .select('*')
+        .eq('id', professionalId)
         .eq('user_type', 'professional')
         .single();
 
@@ -120,365 +84,330 @@ const ProfessionalProfileView = () => {
         return;
       }
 
-      setProfessional(data);
+      // Parse campos JSON se existirem e não forem null
+      const professionalData = {
+        ...data,
+        skills: data.skills ? JSON.parse(data.skills) : [],
+        specializations: data.specializations ? JSON.parse(data.specializations) : [],
+      };
+
+      setProfessional(professionalData);
     } catch (error) {
-      console.error('Error fetching professional:', error);
-      toast({
-        title: "Erro ao carregar perfil",
-        description: "Não foi possível carregar as informações do profissional.",
-        variant: "destructive"
-      });
+      console.error('Error fetching professional profile:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleContact = async () => {
-    if (!profile || !professional) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para entrar em contato.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const fetchReviews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('professional_id', professionalId)
+        .order('created_at', { ascending: false });
 
-    if (profile.user_type !== 'client') {
-      toast({
-        title: "Erro",
-        description: "Apenas clientes podem entrar em contato com profissionais.",
-        variant: "destructive"
-      });
-      return;
-    }
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        return;
+      }
 
-    // Verificar se já existe uma conversa
-    const { data: existingConversation } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('client_id', profile.id)
-      .eq('professional_id', professional.id)
-      .single();
-
-    if (existingConversation) {
-      navigate('/messages');
-      return;
-    }
-
-    // Criar nova conversa
-    const conversation = await createConversation(profile.id, professional.id);
-    if (conversation) {
-      toast({
-        title: "Conversa criada!",
-        description: "Você pode agora trocar mensagens com o profissional."
-      });
-      navigate('/messages');
+      setReviews(data || []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
     }
   };
 
+  const handleStartConversation = async () => {
+    if (!currentUser || !professional) return;
+
+    setStartingConversation(true);
+    try {
+      await startConversation(currentUser.id, professional.id);
+      toast({
+        title: "Conversa iniciada",
+        description: "Você pode agora enviar mensagens para este profissional.",
+      });
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      toast({
+        title: "Erro ao iniciar conversa",
+        description: "Ocorreu um erro ao iniciar a conversa. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setStartingConversation(false);
+    }
+  };
+  
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
+      <ClientLayout>
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+      </ClientLayout>
     );
   }
 
   if (!professional) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/professionals')}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Voltar
-                </Button>
-                <Leaf className="h-8 w-8 text-green-600" />
-                <h1 className="text-xl font-bold text-gray-900">Perfil do Profissional</h1>
-              </div>
-            </div>
-          </div>
-        </header>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card>
-            <CardContent className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Profissional não encontrado
-              </h3>
-              <p className="text-gray-500 mb-4">
-                O perfil que você está procurando não existe ou não está disponível.
-              </p>
-              <Button onClick={() => navigate('/professionals')}>
-                Voltar para Profissionais
-              </Button>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+      <ClientLayout>
+        <Card>
+          <CardContent className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Profissional não encontrado
+            </h3>
+            <p className="text-gray-500">
+              O perfil que você está procurando não existe ou foi removido.
+            </p>
+          </CardContent>
+        </Card>
+      </ClientLayout>
     );
   }
 
-  const initials = professional.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'P';
+  const initials = professional.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'PR';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/professionals')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Button>
-              <Leaf className="h-8 w-8 text-green-600" />
-              <h1 className="text-xl font-bold text-gray-900">Perfil do Profissional</h1>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ClientLayout>
+      <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Professional Info */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* Profile Header */}
+          <div className="lg:col-span-3">
             <Card>
-              <CardHeader>
-                <div className="flex items-start space-x-6">
-                  <Avatar className="w-24 h-24">
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6">
+                  <Avatar className="h-24 w-24">
                     <AvatarImage src={professional.avatar_url} alt={professional.name} />
-                    <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                    <AvatarFallback className="text-2xl bg-green-100 text-green-600">
+                      {initials}
+                    </AvatarFallback>
                   </Avatar>
+                  
                   <div className="flex-1">
-                    <CardTitle className="text-2xl mb-2">{professional.name}</CardTitle>
-                    {professional.academic_title && (
-                      <p className="text-lg text-gray-700 mb-2">{professional.academic_title}</p>
-                    )}
-                    
-                    {/* Rating Display */}
-                    <div className="mb-3">
-                      <RatingDisplay 
-                        rating={averageRating} 
-                        totalReviews={totalReviews} 
-                        size="md"
-                      />
-                    </div>
-
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <Star className="h-4 w-4 text-gray-300" />
-                        <span className="text-sm text-gray-600 ml-1">(4.0)</span>
-                      </div>
-                    </div>
-                    {(professional.city || professional.state) && (
-                      <div className="flex items-center text-gray-600 mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span className="text-sm">
-                          {[professional.city, professional.state].filter(Boolean).join(', ')}
-                        </span>
-                      </div>
-                    )}
-                    {professional.experience_years && (
-                      <div className="flex items-center text-gray-600 mb-2">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span className="text-sm">{professional.experience_years} anos de experiência</span>
-                      </div>
-                    )}
-                    {professional.hourly_rate && (
-                      <div className="flex items-center text-gray-600">
-                        <DollarSign className="h-4 w-4 mr-1" />
-                        <span className="text-sm">R$ {professional.hourly_rate}/hora</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              {professional.bio && (
-                <CardContent>
-                  <h3 className="font-medium text-gray-900 mb-2">Sobre</h3>
-                  <p className="text-gray-600">{professional.bio}</p>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Serviços Habilitados */}
-            {professional.professional_services.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Award className="h-5 w-5 mr-2 text-green-600" />
-                    Serviços Habilitados
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {professional.professional_services.map((ps) => (
-                      <div key={ps.id} className="border rounded-lg p-3 bg-gray-50">
-                        <h4 className="font-medium text-gray-900 mb-1">{ps.services.name}</h4>
-                        <p className="text-sm text-gray-600 mb-2">Categoria: {ps.services.category}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {ps.experience_years && (
-                            <Badge variant="outline" className="text-xs">
-                              {ps.experience_years} anos
-                            </Badge>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                      <div>
+                        <h1 className="text-3xl font-bold text-gray-900">{professional.name}</h1>
+                        <p className="text-xl text-green-600 font-medium">{professional.area_of_expertise}</p>
+                        <p className="text-gray-600">{professional.academic_title}</p>
+                        
+                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                          {professional.city && professional.state && (
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              {professional.city}, {professional.state}
+                            </div>
                           )}
-                          {ps.price_range && (
-                            <Badge variant="outline" className="text-xs">
-                              {ps.price_range}
-                            </Badge>
+                          {professional.experience_years && (
+                            <div className="flex items-center">
+                              <Award className="h-4 w-4 mr-1" />
+                              {professional.experience_years} anos de experiência
+                            </div>
                           )}
                         </div>
                       </div>
+                      
+                      <div className="flex space-x-3 mt-4 md:mt-0">
+                        {currentUser?.user_type === 'client' && (
+                          <Button onClick={handleStartConversation} disabled={startingConversation}>
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            {startingConversation ? 'Iniciando...' : 'Enviar Mensagem'}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Left Column - Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* About */}
+            {professional.bio && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sobre</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 whitespace-pre-wrap">{professional.bio}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Skills */}
+            {professional.skills && professional.skills.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Habilidades</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {professional.skills.map((skill, index) => (
+                      <Badge key={index} variant="secondary">
+                        {skill}
+                      </Badge>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Formação Acadêmica */}
+            {/* Education */}
             {professional.education && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
+                    <GraduationCap className="h-5 w-5 mr-2" />
                     Formação Acadêmica
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">{professional.education}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{professional.education}</p>
                 </CardContent>
               </Card>
             )}
 
-            {/* Registro Profissional */}
-            {(professional.professional_entity || professional.registration_number) && (
+            {/* Reviews */}
+            {reviews.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <FileText className="h-5 w-5 mr-2 text-purple-600" />
-                    Registro Profissional
-                  </CardTitle>
+                  <CardTitle>Avaliações</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {professional.professional_entity && (
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-1">Entidade de Classe</h4>
-                      <p className="text-gray-700">{professional.professional_entity}</p>
+                <CardContent className="space-y-4">
+                  {reviews.map((review, index) => (
+                    <div key={index} className="border-b last:border-b-0 pb-4 last:pb-0">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {new Date(review.created_at).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                      {review.comment && (
+                        <p className="text-gray-700">{review.comment}</p>
+                      )}
                     </div>
-                  )}
-                  {professional.registration_number && (
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-1">Número de Registro</h4>
-                      <p className="text-gray-700">{professional.registration_number}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Certificações */}
-            {professional.certifications && professional.certifications !== '[]' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Award className="h-5 w-5 mr-2 text-orange-600" />
-                    Certificações
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700">{professional.certifications}</p>
+                  ))}
                 </CardContent>
               </Card>
             )}
           </div>
 
-          {/* Reviews Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Award className="h-5 w-5 mr-2 text-yellow-600" />
-                Avaliações ({totalReviews})
-              </CardTitle>
-              {totalReviews > 0 && (
-                <div className="mt-2">
-                  <RatingDisplay 
-                    rating={averageRating} 
-                    totalReviews={totalReviews} 
-                    size="lg"
-                  />
-                </div>
-              )}
-            </CardHeader>
-            <CardContent>
-              <ReviewsList reviews={reviews} loading={reviewsLoading} />
-            </CardContent>
-          </Card>
-
-          {/* Sidebar */}
+          {/* Right Column - Contact & Info */}
           <div className="space-y-6">
+            {/* Contact Information */}
             <Card>
               <CardHeader>
                 <CardTitle>Contato</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {profile?.user_type === 'client' && (
-                  <Button 
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    onClick={handleContact}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Entrar em Contato
-                  </Button>
+                {professional.email && (
+                  <div className="flex items-center space-x-3">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm">{professional.email}</span>
+                  </div>
                 )}
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => console.log('Solicitar orçamento')}
-                >
-                  Solicitar Orçamento
-                </Button>
+                
+                {professional.phone && (
+                  <div className="flex items-center space-x-3">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm">{professional.phone}</span>
+                  </div>
+                )}
+
+                {professional.website && (
+                  <div className="flex items-center space-x-3">
+                    <Globe className="h-4 w-4 text-gray-400" />
+                    <a 
+                      href={professional.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Website
+                    </a>
+                  </div>
+                )}
+
+                {professional.linkedin_url && (
+                  <div className="flex items-center space-x-3">
+                    <Linkedin className="h-4 w-4 text-gray-400" />
+                    <a 
+                      href={professional.linkedin_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      LinkedIn
+                    </a>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Links */}
-            {(professional.linkedin_url || professional.portfolio_url) && (
+            {/* Professional Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações Profissionais</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {professional.professional_entity && professional.registration_number && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Registro Profissional</p>
+                    <p className="text-sm">{professional.professional_entity}: {professional.registration_number}</p>
+                  </div>
+                )}
+
+                {professional.hourly_rate && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Taxa por Hora</p>
+                    <p className="text-sm">R$ {professional.hourly_rate.toLocaleString()}</p>
+                  </div>
+                )}
+
+                {professional.availability && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Disponibilidade</p>
+                    <p className="text-sm">{professional.availability}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Specializations */}
+            {professional.specializations && professional.specializations.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Links</CardTitle>
+                  <CardTitle>Especializações</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {professional.linkedin_url && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full justify-start"
-                      onClick={() => window.open(professional.linkedin_url, '_blank')}
-                    >
-                      LinkedIn
-                    </Button>
-                  )}
-                  {professional.portfolio_url && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full justify-start"
-                      onClick={() => window.open(professional.portfolio_url, '_blank')}
-                    >
-                      Portfólio
-                    </Button>
-                  )}
+                <CardContent>
+                  <div className="space-y-2">
+                    {professional.specializations.map((spec, index) => (
+                      <Badge key={index} variant="outline" className="mr-2 mb-2">
+                        {spec}
+                      </Badge>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </ClientLayout>
   );
 };
 

@@ -1,34 +1,27 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ProjectDetailsHeader from '@/components/projects/ProjectDetailsHeader';
 import ProjectInfo from '@/components/projects/ProjectInfo';
-import ProjectApplications from '@/components/projects/ProjectApplications';
 import ProjectSidebar from '@/components/projects/ProjectSidebar';
-import ProjectStatusUpdater from '@/components/projects/ProjectStatusUpdater';
+import ProjectApplications from '@/components/projects/ProjectApplications';
 import ProjectTimeline from '@/components/projects/ProjectTimeline';
-import type { Database } from '@/integrations/supabase/types';
-
-type ProjectStatus = Database['public']['Enums']['project_status'];
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface Project {
   id: string;
   title: string;
   description: string;
-  status: ProjectStatus;
+  location?: string;
+  deadline?: string;
   budget_min?: number;
   budget_max?: number;
-  deadline?: string;
-  location?: string;
   created_at: string;
-  updated_at: string;
   client_id: string;
+  service_id: string;
+  status: string;
   services: {
     name: string;
     category: string;
@@ -36,201 +29,140 @@ interface Project {
   profiles: {
     name: string;
   };
-  applications: Application[];
-}
-
-interface Application {
-  id: string;
-  proposed_price?: number;
-  proposal: string;
-  status: string;
-  estimated_duration?: string;
-  created_at: string;
-  profiles: {
-    id: string;
-    name: string;
-    bio?: string;
-    avatar_url?: string;
-  };
 }
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { profile } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     if (id) {
-      fetchProject();
+      fetchProjectDetails(id);
+      checkIfApplied(id);
     }
-  }, [id]);
+  }, [id, profile]);
 
-  const fetchProject = async () => {
+  const fetchProjectDetails = async (projectId: string) => {
     try {
       const { data, error } = await supabase
         .from('projects')
         .select(`
           *,
           services(name, category),
-          profiles(name),
-          applications(
-            id,
-            proposed_price,
-            proposal,
-            status,
-            estimated_duration,
-            created_at,
-            profiles(id, name, bio, avatar_url)
-          )
+          profiles(name)
         `)
-        .eq('id', id)
+        .eq('id', projectId)
         .single();
 
       if (error) {
         toast({
-          title: "Erro ao carregar demanda",
+          title: "Erro ao carregar projeto",
           description: error.message,
           variant: "destructive"
         });
         return;
       }
 
-      // Se o usuário é profissional, não mostrar as candidaturas de outros profissionais
-      if (profile?.user_type === 'professional' && data) {
-        data.applications = [];
-      }
-
       setProject(data);
     } catch (error) {
-      console.error('Error fetching project:', error);
+      console.error('Error fetching project details:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusUpdate = () => {
-    fetchProject(); // Recarregar dados do projeto após atualização de status
-  };
+  const checkIfApplied = async (projectId: string) => {
+    if (!profile?.id) return;
 
-  const handleApplicationUpdate = () => {
-    fetchProject(); // Recarregar dados do projeto após atualização de candidatura
-  };
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('professional_id', profile.id)
+        .single();
 
-  const isOwner = profile?.id === project?.client_id;
-  const isContractedStatus = project?.status && ['in_progress', 'completed'].includes(project.status);
-  const canReview = isOwner && project?.status === 'completed';
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking application:', error);
+        return;
+      }
 
-  // Criar timeline mock - em uma implementação completa, isso viria do banco de dados
-  const createTimelineEvents = (project: Project) => {
-    const events = [
-      { status: 'draft' as ProjectStatus, date: project.created_at },
-      { status: 'open' as ProjectStatus, date: project.created_at }
-    ];
-
-    if (project.status === 'in_progress' || project.status === 'completed') {
-      events.push({ status: 'in_progress' as ProjectStatus, date: project.updated_at });
+      setHasApplied(!!data);
+    } catch (error) {
+      console.error('Error checking application:', error);
     }
-
-    if (project.status === 'completed') {
-      events.push({ status: 'completed' as ProjectStatus, date: project.updated_at });
-    }
-
-    return events;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
+      <ClientLayout>
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+      </ClientLayout>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <Card>
-            <CardContent className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Demanda não encontrada
-              </h3>
-              <Button onClick={() => navigate('/dashboard')} variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar ao Dashboard
-              </Button>
-            </CardContent>
-          </Card>
+      <ClientLayout>
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Projeto não encontrado
+          </h3>
+          <p className="text-gray-500">
+            O projeto que você está procurando não existe ou foi removido.
+          </p>
         </div>
-      </div>
+      </ClientLayout>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <ProjectDetailsHeader />
+  const isOwner = profile?.id === project.client_id;
+  const canApply = profile?.user_type === 'professional' && 
+                   project.status === 'open' && 
+                   !hasApplied && 
+                   !isOwner;
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  return (
+    <ClientLayout>
+      <div className="max-w-7xl mx-auto">
+        <ProjectDetailsHeader 
+          project={project}
+          isOwner={isOwner}
+          canApply={canApply}
+          hasApplied={hasApplied}
+          onApply={() => navigate(`/apply/${project.id}`)}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
           <div className="lg:col-span-2 space-y-6">
             <ProjectInfo project={project} />
             
-            {/* Timeline do projeto para projetos contratados */}
-            {isContractedStatus && (
-              <ProjectTimeline 
-                events={createTimelineEvents(project)}
-                currentStatus={project.status}
-              />
+            {isOwner && (
+              <ProjectApplications projectId={project.id} />
             )}
-
-            {/* Só mostrar candidaturas se o usuário for o cliente dono da demanda */}
-            {profile?.user_type === 'client' && profile?.id === project.client_id && (
-              <ProjectApplications 
-                applications={project.applications} 
-                profile={profile}
-                onApplicationUpdate={handleApplicationUpdate}
-              />
-            )}
+            
+            <ProjectTimeline projectId={project.id} />
           </div>
-          
-          <div className="space-y-6">
-            <ProjectSidebar project={project} profile={profile} />
-            
-            {/* Botão de avaliação para projetos concluídos */}
-            {canReview && (
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">Projeto Concluído</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Avalie o trabalho realizado pelo profissional
-                  </p>
-                  <Button 
-                    onClick={() => navigate(`/review/${project.id}`)}
-                    className="w-full"
-                  >
-                    Avaliar Profissional
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Atualizador de status */}
-            {isContractedStatus && (
-              <ProjectStatusUpdater
-                projectId={project.id}
-                currentStatus={project.status}
-                userType={profile?.user_type as 'client' | 'professional'}
-                isOwner={isOwner || profile?.user_type === 'professional'}
-                onStatusUpdate={handleStatusUpdate}
-              />
-            )}
+
+          <div className="lg:col-span-1">
+            <ProjectSidebar 
+              project={project}
+              isOwner={isOwner}
+              canApply={canApply}
+              hasApplied={hasApplied}
+              onApply={() => navigate(`/apply/${project.id}`)}
+            />
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </ClientLayout>
   );
 };
 
