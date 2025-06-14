@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateProject from "./pages/CreateProject";
+import ProjectDetails from "./pages/ProjectDetails";
+import FindProfessionals from "./pages/FindProfessionals";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -60,6 +62,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CreateProject />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id" 
+              element={
+                <ProtectedRoute>
+                  <ProjectDetails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/professionals" 
+              element={
+                <ProtectedRoute>
+                  <FindProfessionals />
                 </ProtectedRoute>
               } 
             />

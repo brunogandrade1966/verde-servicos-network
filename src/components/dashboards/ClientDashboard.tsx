@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Leaf, Plus, Eye, Calendar, MapPin, DollarSign, LogOut } from 'lucide-react';
+import { Leaf, Plus, Eye, Calendar, MapPin, DollarSign, LogOut, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -106,6 +106,10 @@ const ClientDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/professionals')}>
+                <Users className="h-4 w-4 mr-2" />
+                Encontrar Profissionais
+              </Button>
               <span className="text-sm text-gray-700">Olá, {profile?.name}</span>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
@@ -157,10 +161,16 @@ const ClientDashboard = () => {
         {/* Actions */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Meus Projetos</h2>
-          <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Projeto
-          </Button>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => navigate('/professionals')}>
+              <Users className="h-4 w-4 mr-2" />
+              Buscar Profissionais
+            </Button>
+            <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Projeto
+            </Button>
+          </div>
         </div>
 
         {/* Projects List */}
