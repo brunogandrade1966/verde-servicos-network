@@ -12,6 +12,8 @@ interface Professional {
   name: string;
   bio?: string;
   avatar_url?: string;
+  city?: string;
+  state?: string;
   professional_services: Array<{
     id: string;
     price_range?: string;
@@ -38,6 +40,8 @@ const FindProfessionals = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedService, setSelectedService] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedState, setSelectedState] = useState('');
 
   useEffect(() => {
     fetchProfessionals();
@@ -71,6 +75,8 @@ const FindProfessionals = () => {
           name,
           bio,
           avatar_url,
+          city,
+          state,
           professional_services(
             id,
             price_range,
@@ -108,8 +114,16 @@ const FindProfessionals = () => {
     const matchesCategory = !selectedCategory ||
                            professional.professional_services.some(ps => ps.services.category === selectedCategory);
 
-    return matchesSearch && matchesService && matchesCategory;
+    const matchesCity = !selectedCity || professional.city === selectedCity;
+    
+    const matchesState = !selectedState || professional.state === selectedState;
+
+    return matchesSearch && matchesService && matchesCategory && matchesCity && matchesState;
   });
+
+  // Extract unique cities and states from professionals
+  const cities = [...new Set(professionals.map(p => p.city).filter(Boolean))].sort();
+  const states = [...new Set(professionals.map(p => p.state).filter(Boolean))].sort();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -120,10 +134,16 @@ const FindProfessionals = () => {
           searchQuery={searchQuery}
           selectedService={selectedService}
           selectedCategory={selectedCategory}
+          selectedCity={selectedCity}
+          selectedState={selectedState}
           services={services}
+          cities={cities}
+          states={states}
           onSearchChange={setSearchQuery}
           onServiceChange={setSelectedService}
           onCategoryChange={setSelectedCategory}
+          onCityChange={setSelectedCity}
+          onStateChange={setSelectedState}
         />
 
         <div className="mb-6">
