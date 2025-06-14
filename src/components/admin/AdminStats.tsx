@@ -1,131 +1,80 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, Briefcase, Star, Leaf } from 'lucide-react';
+import { Users, Briefcase, FileText, Activity } from 'lucide-react';
 
-interface Stats {
+interface AdminStats {
   totalUsers: number;
-  totalClients: number;
-  totalProfessionals: number;
   totalProjects: number;
   totalApplications: number;
-  totalPartnerships: number;
+  activeProjects: number;
 }
 
 interface AdminStatsProps {
-  stats: Stats;
+  stats: AdminStats;
   loading: boolean;
 }
 
 const AdminStats = ({ stats, loading }: AdminStatsProps) => {
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </CardHeader>
+          </Card>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardDescription>Total de Usuários</CardDescription>
-            <Users className="h-4 w-4 text-blue-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-blue-600">
-            {stats.totalUsers}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600">
-            {stats.totalClients} clientes • {stats.totalProfessionals} profissionais
-          </div>
+          <div className="text-2xl font-bold text-blue-600">{stats.totalUsers}</div>
+          <CardDescription>Usuários registrados</CardDescription>
         </CardContent>
       </Card>
-
+      
       <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardDescription>Projetos na Plataforma</CardDescription>
-            <FileText className="h-4 w-4 text-green-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-green-600">
-            {stats.totalProjects}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total de Projetos</CardTitle>
+          <Briefcase className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600">
-            Projetos cadastrados por clientes
-          </div>
+          <div className="text-2xl font-bold text-green-600">{stats.totalProjects}</div>
+          <CardDescription>Projetos criados</CardDescription>
         </CardContent>
       </Card>
-
+      
       <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardDescription>Candidaturas Enviadas</CardDescription>
-            <Briefcase className="h-4 w-4 text-orange-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-orange-600">
-            {stats.totalApplications}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Projetos Ativos</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600">
-            Candidaturas de profissionais
-          </div>
+          <div className="text-2xl font-bold text-orange-600">{stats.activeProjects}</div>
+          <CardDescription>Em andamento</CardDescription>
         </CardContent>
       </Card>
-
+      
       <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardDescription>Parcerias Formadas</CardDescription>
-            <Users className="h-4 w-4 text-purple-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-purple-600">
-            {stats.totalPartnerships}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Candidaturas</CardTitle>
+          <FileText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600">
-            Colaborações entre profissionais
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardDescription>Taxa de Engajamento</CardDescription>
-            <Star className="h-4 w-4 text-yellow-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-yellow-600">
-            {stats.totalProjects > 0 ? Math.round((stats.totalApplications / stats.totalProjects) * 100) / 100 : 0}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-gray-600">
-            Candidaturas por projeto
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardDescription>Crescimento</CardDescription>
-            <Leaf className="h-4 w-4 text-green-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-green-600">
-            +{stats.totalUsers}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-gray-600">
-            Novos usuários cadastrados
-          </div>
+          <div className="text-2xl font-bold text-purple-600">{stats.totalApplications}</div>
+          <CardDescription>Total de candidaturas</CardDescription>
         </CardContent>
       </Card>
     </div>

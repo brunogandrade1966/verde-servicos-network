@@ -1,7 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Leaf, LogOut } from 'lucide-react';
+import { Leaf, Settings, LogOut } from 'lucide-react';
 
 interface AdminHeaderProps {
   profileName?: string;
@@ -21,8 +20,11 @@ const AdminHeader = ({ profileName, onSignOut }: AdminHeaderProps) => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary">Administrador</Badge>
             <span className="text-sm text-gray-700">Olá, {profileName}</span>
+            <Button variant="ghost" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+              Configurações
+            </Button>
             <Button variant="ghost" size="sm" onClick={onSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sair

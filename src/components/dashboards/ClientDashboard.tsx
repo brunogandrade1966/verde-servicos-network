@@ -2,12 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Leaf, Plus, Eye, Calendar, MapPin, DollarSign, LogOut, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Leaf, LogOut, Plus, Search, Eye, Users } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -22,9 +22,6 @@ interface Project {
   services: {
     name: string;
   };
-  applications: {
-    id: string;
-  }[];
 }
 
 const ClientDashboard = () => {
@@ -35,18 +32,18 @@ const ClientDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchProjects();
+    fetchMyProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchMyProjects = async () => {
     try {
       const { data, error } = await supabase
         .from('projects')
         .select(`
           *,
-          services(name),
-          applications(id)
+          services(name)
         `)
+        .eq('client_id', profile?.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -55,10 +52,9 @@ const ClientDashboard = () => {
           description: error.message,
           variant: "destructive"
         });
-        return;
+      } else {
+        setProjects(data || []);
       }
-
-      setProjects(data || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -66,17 +62,26 @@ const ClientDashboard = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   const getStatusBadge = (status: string) => {
-    const statusMap = {
-      draft: { label: 'Rascunho', variant: 'secondary' as const },
-      open: { label: 'Aberto', variant: 'default' as const },
-      in_progress: { label: 'Em Andamento', variant: 'outline' as const },
-      completed: { label: 'Concluído', variant: 'default' as const },
-      cancelled: { label: 'Cancelado', variant: 'destructive' as const }
-    };
-    
-    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.draft;
-    return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+    switch (status) {
+      case 'draft':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Rascunho</Badge>;
+      case 'open':
+        return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Aberto</Badge>;
+      case 'in_progress':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Em Andamento</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">Concluído</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">Cancelado</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   const formatCurrency = (amount?: number) => {
@@ -87,14 +92,8 @@ const ClientDashboard = () => {
     }).format(amount);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -106,10 +105,6 @@ const ClientDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/professionals')}>
-                <Users className="h-4 w-4 mr-2" />
-                Encontrar Profissionais
-              </Button>
               <span className="text-sm text-gray-700">Olá, {profile?.name}</span>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
@@ -120,7 +115,6 @@ const ClientDashboard = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -129,7 +123,7 @@ const ClientDashboard = () => {
               <CardTitle className="text-2xl font-bold text-green-600">
                 {projects.length}
               </CardTitle>
-              <CardDescription>Projetos Totais</CardDescription>
+              <CardDescription>Projetos Criados</CardDescription>
             </CardHeader>
           </Card>
           <Card>
@@ -151,113 +145,95 @@ const ClientDashboard = () => {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-2xl font-bold text-purple-600">
-                {projects.reduce((sum, p) => sum + (p.applications?.length || 0), 0)}
+                {projects.filter(p => p.status === 'completed').length}
               </CardTitle>
-              <CardDescription>Candidaturas Recebidas</CardDescription>
+              <CardDescription>Concluídos</CardDescription>
             </CardHeader>
           </Card>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Meus Projetos</h2>
-          <div className="flex space-x-3">
-            <Button variant="outline" onClick={() => navigate('/professionals')}>
-              <Users className="h-4 w-4 mr-2" />
-              Buscar Profissionais
-            </Button>
-            <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Projeto
-            </Button>
-          </div>
+        {/* Quick Actions */}
+        <div className="flex space-x-4 mb-8">
+          <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Criar Projeto
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/projects')}>
+            <Search className="h-4 w-4 mr-2" />
+            Buscar Projetos
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/professionals')}>
+            <Users className="h-4 w-4 mr-2" />
+            Encontrar Profissionais
+          </Button>
         </div>
 
-        {/* Projects List */}
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          </div>
-        ) : projects.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Nenhum projeto encontrado
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Comece criando seu primeiro projeto para encontrar profissionais ambientais.
-              </p>
-              <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Primeiro Projeto
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-6">
-            {projects.map((project) => (
-              <Card key={project.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">{project.title}</CardTitle>
-                      <CardDescription className="mb-3">
-                        {project.description.length > 150 
-                          ? `${project.description.substring(0, 150)}...` 
-                          : project.description
-                        }
-                      </CardDescription>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span className="flex items-center">
-                          <Badge variant="outline">{project.services?.name}</Badge>
-                        </span>
-                        {project.location && (
-                          <span className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {project.location}
-                          </span>
-                        )}
-                        {project.deadline && (
-                          <span className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            {new Date(project.deadline).toLocaleDateString('pt-BR')}
+        {/* My Projects */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Meus Projetos</h2>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            </div>
+          ) : projects.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Nenhum projeto criado
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  Comece criando seu primeiro projeto ambiental.
+                </p>
+                <Button onClick={() => navigate('/projects/new')} className="bg-green-600 hover:bg-green-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Projeto
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6">
+              {projects.map((project) => (
+                <Card key={project.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{project.title}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {project.services?.name}
+                        </CardDescription>
+                      </div>
+                      {getStatusBadge(project.status)}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {project.description.length > 150 
+                        ? `${project.description.substring(0, 150)}...` 
+                        : project.description
+                      }
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm text-gray-500">
+                        {(project.budget_min || project.budget_max) && (
+                          <span className="text-green-600 font-medium">
+                            {project.budget_min && project.budget_max 
+                              ? `${formatCurrency(project.budget_min)} - ${formatCurrency(project.budget_max)}`
+                              : formatCurrency(project.budget_min || project.budget_max)
+                            }
                           </span>
                         )}
                       </div>
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/projects/${project.id}`)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Projeto
+                      </Button>
                     </div>
-                    <div className="flex flex-col items-end space-y-2">
-                      {getStatusBadge(project.status)}
-                      {project.applications && project.applications.length > 0 && (
-                        <Badge variant="secondary">
-                          {project.applications.length} candidatura{project.applications.length !== 1 ? 's' : ''}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-4 text-sm">
-                      {(project.budget_min || project.budget_max) && (
-                        <span className="flex items-center text-green-600 font-medium">
-                          <DollarSign className="h-4 w-4 mr-1" />
-                          {project.budget_min && project.budget_max 
-                            ? `${formatCurrency(project.budget_min)} - ${formatCurrency(project.budget_max)}`
-                            : formatCurrency(project.budget_min || project.budget_max)
-                          }
-                        </span>
-                      )}
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => navigate(`/projects/${project.id}`)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver Detalhes
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
