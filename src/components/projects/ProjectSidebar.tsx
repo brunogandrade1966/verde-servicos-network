@@ -2,8 +2,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 interface Project {
+  id: string;
   status: string;
   created_at: string;
   services: {
@@ -21,6 +23,8 @@ interface ProjectSidebarProps {
 }
 
 const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
+  const navigate = useNavigate();
+
   const getStatusBadge = (status: string) => {
     const statusMap = {
       draft: { label: 'Rascunho', variant: 'secondary' as const },
@@ -32,6 +36,10 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
     
     const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.draft;
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+  };
+
+  const handleEditProject = () => {
+    navigate(`/projects/${project.id}/edit`);
   };
 
   return (
@@ -66,8 +74,12 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
             <CardTitle>Ações</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full" variant="outline">
-              Editar Projeto
+            <Button 
+              className="w-full" 
+              variant="outline"
+              onClick={handleEditProject}
+            >
+              Editar Demanda
             </Button>
             <Button className="w-full bg-green-600 hover:bg-green-700">
               Buscar Profissionais

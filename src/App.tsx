@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateProject from "./pages/CreateProject";
+import EditProject from "./pages/EditProject";
 import ProjectDetails from "./pages/ProjectDetails";
 import BrowseProjects from "./pages/BrowseProjects";
 import ApplyToProject from "./pages/ApplyToProject";
@@ -65,6 +67,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CreateProject />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <EditProject />
                 </ProtectedRoute>
               } 
             />
