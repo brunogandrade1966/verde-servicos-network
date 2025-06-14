@@ -6,12 +6,36 @@ import AdminDashboard from '@/components/dashboards/AdminDashboard';
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { profile, loading } = useAuth();
+  const { profile, loading, user } = useAuth();
 
-  if (loading || !profile) {
+  console.log('Dashboard - loading:', loading, 'user:', user, 'profile:', profile);
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+      </div>
+    );
+  }
+
+  // If we have a user but no profile yet, show loading
+  if (user && !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-gray-600">Carregando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Erro ao carregar perfil do usuário.</p>
+        </div>
       </div>
     );
   }

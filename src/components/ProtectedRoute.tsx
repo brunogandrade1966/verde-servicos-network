@@ -15,6 +15,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  console.log('ProtectedRoute - loading:', loading, 'user:', user, 'requireAuth:', requireAuth);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -24,10 +26,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (requireAuth && !user) {
+    console.log('Redirecting to login - no user and auth required');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (!requireAuth && user) {
+    console.log('Redirecting to dashboard - user exists and no auth required');
     return <Navigate to="/dashboard" replace />;
   }
 
