@@ -42,6 +42,10 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
     navigate(`/projects/${project.id}/edit`);
   };
 
+  const handleFindProfessionals = () => {
+    navigate('/professionals');
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -81,7 +85,10 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
             >
               Editar Demanda
             </Button>
-            <Button className="w-full bg-green-600 hover:bg-green-700">
+            <Button 
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={handleFindProfessionals}
+            >
               Buscar Profissionais
             </Button>
           </CardContent>
