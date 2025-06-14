@@ -1,56 +1,56 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, CheckCircle, Play, Pause, XCircle } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface TimelineEvent {
-  status: string;
+  status: ProjectStatus;
   date: string;
   note?: string;
 }
 
 interface ProjectTimelineProps {
   events: TimelineEvent[];
-  currentStatus: string;
+  currentStatus: ProjectStatus;
 }
 
 const ProjectTimeline = ({ events, currentStatus }: ProjectTimelineProps) => {
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: ProjectStatus) => {
     const iconMap = {
       draft: Pause,
       open: Clock,
-      contracted: CheckCircle,
       in_progress: Play,
       completed: CheckCircle,
       cancelled: XCircle
     };
     
-    return iconMap[status as keyof typeof iconMap] || Clock;
+    return iconMap[status] || Clock;
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: ProjectStatus) => {
     const labelMap = {
       draft: 'Rascunho',
       open: 'Aberto',
-      contracted: 'Contratado',
       in_progress: 'Em Andamento',
       completed: 'Concluído',
       cancelled: 'Cancelado'
     };
     
-    return labelMap[status as keyof typeof labelMap] || status;
+    return labelMap[status] || status;
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: ProjectStatus) => {
     const colorMap = {
       draft: 'text-gray-500',
       open: 'text-blue-500',
-      contracted: 'text-purple-500',
       in_progress: 'text-yellow-500',
       completed: 'text-green-500',
       cancelled: 'text-red-500'
     };
     
-    return colorMap[status as keyof typeof colorMap] || 'text-gray-500';
+    return colorMap[status] || 'text-gray-500';
   };
 
   return (

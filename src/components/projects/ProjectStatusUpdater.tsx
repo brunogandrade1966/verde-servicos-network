@@ -7,10 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectStatusBadge from './ProjectStatusBadge';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ProjectStatusUpdaterProps {
   projectId: string;
-  currentStatus: string;
+  currentStatus: ProjectStatus;
   userType: 'client' | 'professional';
   isOwner: boolean;
   onStatusUpdate: () => void;
@@ -23,16 +26,15 @@ const ProjectStatusUpdater = ({
   isOwner, 
   onStatusUpdate 
 }: ProjectStatusUpdaterProps) => {
-  const [newStatus, setNewStatus] = useState(currentStatus);
+  const [newStatus, setNewStatus] = useState<ProjectStatus>(currentStatus);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const getAvailableStatuses = () => {
+  const getAvailableStatuses = (): Record<ProjectStatus, string> => {
     const baseStatuses = {
       draft: 'Rascunho',
       open: 'Aberto',
-      contracted: 'Contratado',
       in_progress: 'Em Andamento',
       completed: 'Concluído',
       cancelled: 'Cancelado'
@@ -44,11 +46,6 @@ const ProjectStatusUpdater = ({
         case 'draft':
           return { open: baseStatuses.open };
         case 'open':
-          return { 
-            contracted: baseStatuses.contracted,
-            cancelled: baseStatuses.cancelled 
-          };
-        case 'contracted':
           return { 
             in_progress: baseStatuses.in_progress,
             cancelled: baseStatuses.cancelled 
@@ -62,9 +59,9 @@ const ProjectStatusUpdater = ({
           return {};
       }
     } else {
-      // Profissional só pode atualizar status quando contratado
+      // Profissional só pode atualizar status quando projeto está aberto ou em andamento
       switch (currentStatus) {
-        case 'contracted':
+        case 'open':
           return { in_progress: baseStatuses.in_progress };
         case 'in_progress':
           return { completed: baseStatuses.completed };
@@ -106,12 +103,9 @@ const ProjectStatusUpdater = ({
         return;
       }
 
-      // Registrar histórico de status (será implementado posteriormente)
-      // await createStatusHistory(projectId, currentStatus, newStatus, note);
-
       toast({
         title: "Status atualizado!",
-        description: `Status alterado para: ${availableStatuses[newStatus as keyof typeof availableStatuses]}`
+        description: `Status alterado para: ${availableStatuses[newStatus]}`
       });
 
       onStatusUpdate();
@@ -156,7 +150,10 @@ const ProjectStatusUpdater = ({
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Novo Status:</label>
-          <Select value={newStatus} onValueChange={setNewStatus}>
+          <Select 
+            value={newStatus} 
+            onValueChange={(value) => setNewStatus(value as ProjectStatus)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o novo status" />
             </SelectTrigger>

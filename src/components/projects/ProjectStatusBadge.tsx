@@ -1,14 +1,17 @@
 
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Play, Pause, XCircle } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ProjectStatusBadgeProps {
-  status: string;
+  status: ProjectStatus;
   showIcon?: boolean;
 }
 
 const ProjectStatusBadge = ({ status, showIcon = true }: ProjectStatusBadgeProps) => {
-  const getStatusConfig = (status: string) => {
+  const getStatusConfig = (status: ProjectStatus) => {
     const statusMap = {
       draft: { 
         label: 'Rascunho', 
@@ -39,16 +42,10 @@ const ProjectStatusBadge = ({ status, showIcon = true }: ProjectStatusBadgeProps
         variant: 'destructive' as const, 
         icon: XCircle,
         color: 'bg-red-100 text-red-800'
-      },
-      contracted: {
-        label: 'Contratado',
-        variant: 'default' as const,
-        icon: CheckCircle,
-        color: 'bg-purple-100 text-purple-800'
       }
     };
     
-    return statusMap[status as keyof typeof statusMap] || statusMap.draft;
+    return statusMap[status] || statusMap.draft;
   };
 
   const config = getStatusConfig(status);

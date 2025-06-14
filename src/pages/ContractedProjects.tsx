@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,12 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface ContractedProject {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: ProjectStatus;
   budget_min?: number;
   budget_max?: number;
   deadline?: string;
@@ -50,7 +52,7 @@ const ContractedProjects = () => {
           services(name, category),
           profiles(name)
         `)
-        .in('status', ['contracted', 'in_progress', 'completed'])
+        .in('status', ['in_progress', 'completed'])
         .order('updated_at', { ascending: false });
 
       // Filtrar baseado no tipo de usuário
@@ -148,7 +150,7 @@ const ContractedProjects = () => {
               </h3>
               <p className="text-gray-600 mb-4">
                 {profile?.user_type === 'client' 
-                  ? 'Você ainda não contratou nenhum profissional.'
+                  ? 'Você ainda não tem projetos em andamento.'
                   : 'Você ainda não foi contratado para nenhuma demanda.'
                 }
               </p>

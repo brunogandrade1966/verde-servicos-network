@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,12 +12,15 @@ import ProjectApplications from '@/components/projects/ProjectApplications';
 import ProjectSidebar from '@/components/projects/ProjectSidebar';
 import ProjectStatusUpdater from '@/components/projects/ProjectStatusUpdater';
 import ProjectTimeline from '@/components/projects/ProjectTimeline';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface Project {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: ProjectStatus;
   budget_min?: number;
   budget_max?: number;
   deadline?: string;
@@ -112,25 +114,21 @@ const ProjectDetails = () => {
   };
 
   const isOwner = profile?.id === project?.client_id;
-  const isContractedStatus = project?.status && ['contracted', 'in_progress', 'completed'].includes(project.status);
+  const isContractedStatus = project?.status && ['in_progress', 'completed'].includes(project.status);
 
   // Criar timeline mock - em uma implementação completa, isso viria do banco de dados
   const createTimelineEvents = (project: Project) => {
     const events = [
-      { status: 'draft', date: project.created_at },
-      { status: 'open', date: project.created_at }
+      { status: 'draft' as ProjectStatus, date: project.created_at },
+      { status: 'open' as ProjectStatus, date: project.created_at }
     ];
 
-    if (isContractedStatus) {
-      events.push({ status: 'contracted', date: project.updated_at });
-    }
-
-    if (project.status === 'in_progress') {
-      events.push({ status: 'in_progress', date: project.updated_at });
+    if (project.status === 'in_progress' || project.status === 'completed') {
+      events.push({ status: 'in_progress' as ProjectStatus, date: project.updated_at });
     }
 
     if (project.status === 'completed') {
-      events.push({ status: 'completed', date: project.updated_at });
+      events.push({ status: 'completed' as ProjectStatus, date: project.updated_at });
     }
 
     return events;
