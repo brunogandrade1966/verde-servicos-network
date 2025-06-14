@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Leaf, LogOut, Plus, Search, Eye, Users } from 'lucide-react';
 
 interface Project {
@@ -67,6 +67,8 @@ const ClientDashboard = () => {
     navigate('/');
   };
 
+  const initials = profile?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
@@ -105,7 +107,17 @@ const ClientDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">Olá, {profile?.name}</span>
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                  <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-gray-700">Olá, {profile?.name}</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
+                <Users className="h-4 w-4 mr-2" />
+                Perfil
+              </Button>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair

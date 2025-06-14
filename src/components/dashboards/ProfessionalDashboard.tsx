@@ -109,6 +109,7 @@ const ProfessionalDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       <DashboardHeader 
         profileName={profile?.name} 
+        profileAvatar={profile?.avatar_url}
         onSignOut={handleSignOut} 
       />
 

@@ -1,4 +1,3 @@
-
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +11,24 @@ interface Profile {
   document?: string;
   avatar_url?: string;
   bio?: string;
+  // Campos específicos do cliente
+  company_name?: string;
+  company_size?: string;
+  industry?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  // Campos específicos do profissional
+  education?: string;
+  experience_years?: number;
+  specializations?: string[];
+  certifications?: string[];
+  languages?: string[];
+  linkedin_url?: string;
+  portfolio_url?: string;
+  availability?: string;
+  hourly_rate?: number;
 }
 
 export const useAuthActions = (user: User | null, fetchUserProfile: (userId: string) => Promise<void>) => {
@@ -92,9 +109,24 @@ export const useAuthActions = (user: User | null, fetchUserProfile: (userId: str
 
     try {
       console.log('Updating profile:', updates);
+      
+      // Converter arrays para JSON strings antes de salvar
+      const dataToUpdate = {
+        ...updates,
+        specializations: updates.specializations ? JSON.stringify(updates.specializations) : undefined,
+        certifications: updates.certifications ? JSON.stringify(updates.certifications) : undefined,
+        languages: updates.languages ? JSON.stringify(updates.languages) : undefined
+      };
+
+      // Remover campos undefined
+      Object.keys(dataToUpdate).forEach(key => 
+        dataToUpdate[key as keyof typeof dataToUpdate] === undefined && 
+        delete dataToUpdate[key as keyof typeof dataToUpdate]
+      );
+
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(dataToUpdate)
         .eq('id', user.id);
 
       if (error) {

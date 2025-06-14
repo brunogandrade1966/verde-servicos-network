@@ -12,6 +12,24 @@ interface Profile {
   document?: string;
   avatar_url?: string;
   bio?: string;
+  // Campos específicos do cliente
+  company_name?: string;
+  company_size?: string;
+  industry?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  // Campos específicos do profissional
+  education?: string;
+  experience_years?: number;
+  specializations?: string[];
+  certifications?: string[];
+  languages?: string[];
+  linkedin_url?: string;
+  portfolio_url?: string;
+  availability?: string;
+  hourly_rate?: number;
 }
 
 export const useAuthProfile = (user: User | null) => {
@@ -32,7 +50,16 @@ export const useAuthProfile = (user: User | null) => {
       }
 
       console.log('Profile fetched:', data);
-      setProfile(data);
+      
+      // Parse campos JSON se existirem
+      const profileData = {
+        ...data,
+        specializations: data.specializations ? JSON.parse(data.specializations) : [],
+        certifications: data.certifications ? JSON.parse(data.certifications) : [],
+        languages: data.languages ? JSON.parse(data.languages) : []
+      };
+      
+      setProfile(profileData);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -40,7 +67,6 @@ export const useAuthProfile = (user: User | null) => {
 
   useEffect(() => {
     if (user) {
-      // Use setTimeout to defer the profile fetch and avoid potential recursion
       setTimeout(() => {
         fetchUserProfile(user.id);
       }, 0);
