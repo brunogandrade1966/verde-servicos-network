@@ -17,8 +17,8 @@ export const ProjectHeader = () => {
             </Button>
             <Leaf className="h-8 w-8 text-green-600" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Criar Novo Projeto</h1>
-              <p className="text-sm text-gray-500">Descreva seu projeto ambiental</p>
+              <h1 className="text-xl font-bold text-gray-900">Criar Nova Demanda</h1>
+              <p className="text-sm text-gray-500">Descreva sua demanda ambiental</p>
             </div>
           </div>
         </div>

@@ -39,7 +39,7 @@ export const ProjectFormActions = ({ loading, onSaveDraft, onPublish }: ProjectF
             Publicando...
           </>
         ) : (
-          'Publicar Projeto'
+          'Publicar Demanda'
         )}
       </Button>
     </div>

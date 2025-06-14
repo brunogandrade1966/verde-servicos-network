@@ -42,7 +42,7 @@ export const ProjectFormFields = ({ formData, services, onInputChange }: Project
     <>
       {/* Título */}
       <div className="space-y-2">
-        <Label htmlFor="title">Título do Projeto *</Label>
+        <Label htmlFor="title">Título da Demanda *</Label>
         <Input
           id="title"
           placeholder="Ex: Licenciamento ambiental para construção de galpão industrial"

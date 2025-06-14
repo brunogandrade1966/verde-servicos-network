@@ -44,7 +44,7 @@ export const ProjectForm = ({ services, profileId, onSuccess }: ProjectFormProps
     if (!formData.title.trim()) {
       toast({
         title: "Erro de validação",
-        description: "O título do projeto é obrigatório",
+        description: "O título da demanda é obrigatório",
         variant: "destructive"
       });
       return false;
@@ -53,7 +53,7 @@ export const ProjectForm = ({ services, profileId, onSuccess }: ProjectFormProps
     if (!formData.description.trim()) {
       toast({
         title: "Erro de validação",
-        description: "A descrição do projeto é obrigatória",
+        description: "A descrição da demanda é obrigatória",
         variant: "destructive"
       });
       return false;
@@ -100,7 +100,7 @@ export const ProjectForm = ({ services, profileId, onSuccess }: ProjectFormProps
 
       if (error) {
         toast({
-          title: "Erro ao criar projeto",
+          title: "Erro ao criar demanda",
           description: error.message,
           variant: "destructive"
         });
@@ -108,8 +108,8 @@ export const ProjectForm = ({ services, profileId, onSuccess }: ProjectFormProps
       }
 
       toast({
-        title: "Projeto criado com sucesso!",
-        description: isDraft ? "Projeto salvo como rascunho" : "Projeto publicado e disponível para candidaturas"
+        title: "Demanda criada com sucesso!",
+        description: isDraft ? "Demanda salva como rascunho" : "Demanda publicada e disponível para candidaturas"
       });
 
       onSuccess();
@@ -117,7 +117,7 @@ export const ProjectForm = ({ services, profileId, onSuccess }: ProjectFormProps
       console.error('Error creating project:', error);
       toast({
         title: "Erro inesperado",
-        description: "Ocorreu um erro ao criar o projeto",
+        description: "Ocorreu um erro ao criar a demanda",
         variant: "destructive"
       });
     } finally {
@@ -128,9 +128,9 @@ export const ProjectForm = ({ services, profileId, onSuccess }: ProjectFormProps
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informações do Projeto</CardTitle>
+        <CardTitle>Informações da Demanda</CardTitle>
         <CardDescription>
-          Preencha os detalhes do seu projeto ambiental para encontrar os profissionais ideais
+          Preencha os detalhes da sua demanda ambiental para encontrar os profissionais ideais
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
