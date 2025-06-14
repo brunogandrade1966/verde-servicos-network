@@ -13,7 +13,7 @@ import AvatarUpload from './AvatarUpload';
 interface ProfessionalProfileData {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   document: string;
   avatar_url?: string;
   bio?: string;
