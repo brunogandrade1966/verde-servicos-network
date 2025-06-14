@@ -15,6 +15,7 @@ interface Project {
   budget_min?: number;
   budget_max?: number;
   created_at: string;
+  service_id: string;
   services: {
     name: string;
     category: string;
