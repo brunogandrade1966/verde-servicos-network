@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { User, Award, MapPin, Save, Plus, X, Phone, Link, GraduationCap, Building, FileText } from 'lucide-react';
 import AvatarUpload from './AvatarUpload';
+import CepSearchField from './CepSearchField';
 
 interface ProfessionalProfileData {
   name: string;
@@ -64,6 +64,21 @@ const ProfessionalProfileForm = ({ profile, userId, onSave, loading }: Professio
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleAddressFound = (address: {
+    address: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      address: address.address,
+      neighborhood: address.neighborhood,
+      city: address.city,
+      state: address.state
     }));
   };
 
@@ -404,16 +419,13 @@ const ProfessionalProfileForm = ({ profile, userId, onSave, loading }: Professio
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="postal_code">CEP *</Label>
-              <Input
-                id="postal_code"
-                value={formData.postal_code || ''}
-                onChange={(e) => handleInputChange('postal_code', e.target.value)}
-                placeholder="00000-000"
-                required
-              />
-            </div>
+            <CepSearchField
+              value={formData.postal_code || ''}
+              onChange={(value) => handleInputChange('postal_code', value)}
+              onAddressFound={handleAddressFound}
+              label="CEP"
+              required
+            />
             <div className="md:col-span-2">
               <Label htmlFor="address">Endereço *</Label>
               <Input

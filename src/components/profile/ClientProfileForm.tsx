@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Building, MapPin, Save } from 'lucide-react';
 import AvatarUpload from './AvatarUpload';
+import CepSearchField from './CepSearchField';
 
 interface ClientProfileData {
   name: string;
@@ -39,6 +39,20 @@ const ClientProfileForm = ({ profile, userId, onSave, loading }: ClientProfileFo
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleAddressFound = (address: {
+    address: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      address: address.address,
+      city: address.city,
+      state: address.state
     }));
   };
 
@@ -228,6 +242,14 @@ const ClientProfileForm = ({ profile, userId, onSave, loading }: ClientProfileFo
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CepSearchField
+              value={formData.postal_code || ''}
+              onChange={(value) => handleInputChange('postal_code', value)}
+              onAddressFound={handleAddressFound}
+              label="CEP"
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <Label htmlFor="address">Endereço</Label>
