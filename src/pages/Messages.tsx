@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMessaging } from '@/hooks/useMessaging';
+import { useConversations } from '@/hooks/useConversations';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import MessagesHeader from '@/components/messages/MessagesHeader';
 import ConversationPreview from '@/components/messages/ConversationPreview';
 import ConversationView from '@/components/messages/ConversationView';
@@ -10,7 +11,8 @@ import { MessageCircle } from 'lucide-react';
 
 const Messages = () => {
   const { profile } = useAuth();
-  const { conversations, loading, totalUnreadCount } = useMessaging(profile?.id);
+  const { conversations, loading } = useConversations(profile?.id);
+  const { unreadCount } = useUnreadMessages();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   if (loading) {
@@ -45,7 +47,7 @@ const Messages = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessagesHeader 
           totalConversations={conversations.length}
-          unreadCount={totalUnreadCount}
+          unreadCount={unreadCount}
         />
 
         <div className="mt-8">
