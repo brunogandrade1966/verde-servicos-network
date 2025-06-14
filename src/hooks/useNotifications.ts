@@ -1,8 +1,9 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useChannelManager } from './useChannelManager';
 
 interface Notification {
   id: string;
@@ -21,7 +22,7 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const channelRef = useRef<any>(null);
+  const { createChannel, removeChannel } = useChannelManager();
 
   const fetchNotifications = async () => {
     if (!profile?.id) return;
@@ -125,17 +126,10 @@ export const useNotifications = () => {
 
     fetchNotifications();
 
-    // Remove any existing channel
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
-    // Create new channel with unique name
     const channelName = `notifications-${profile.id}`;
-    const channel = supabase.channel(channelName);
+    
+    const channel = createChannel(channelName);
 
-    // Set up event listeners before subscribing
     channel
       .on(
         'postgres_changes',
@@ -176,13 +170,8 @@ export const useNotifications = () => {
         console.log('Notifications subscription status:', status);
       });
 
-    channelRef.current = channel;
-
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+      removeChannel(channelName);
     };
   }, [profile?.id, toast]);
 
