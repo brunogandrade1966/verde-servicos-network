@@ -51,7 +51,7 @@ export const useAuthProfile = (user: User | null) => {
 
       console.log('Profile fetched:', data);
       
-      // Parse campos JSON se existirem
+      // Parse campos JSON se existirem e não forem null
       const profileData = {
         ...data,
         specializations: data.specializations ? JSON.parse(data.specializations) : [],

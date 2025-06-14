@@ -146,38 +146,86 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          availability: string | null
           avatar_url: string | null
           bio: string | null
+          certifications: string | null
+          city: string | null
+          company_name: string | null
+          company_size: string | null
           created_at: string
           document: string | null
+          education: string | null
           email: string
+          experience_years: number | null
+          hourly_rate: number | null
           id: string
+          industry: string | null
+          languages: string | null
+          linkedin_url: string | null
           name: string
           phone: string | null
+          portfolio_url: string | null
+          postal_code: string | null
+          specializations: string | null
+          state: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
+          address?: string | null
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
+          certifications?: string | null
+          city?: string | null
+          company_name?: string | null
+          company_size?: string | null
           created_at?: string
           document?: string | null
+          education?: string | null
           email: string
+          experience_years?: number | null
+          hourly_rate?: number | null
           id: string
+          industry?: string | null
+          languages?: string | null
+          linkedin_url?: string | null
           name: string
           phone?: string | null
+          portfolio_url?: string | null
+          postal_code?: string | null
+          specializations?: string | null
+          state?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
         Update: {
+          address?: string | null
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
+          certifications?: string | null
+          city?: string | null
+          company_name?: string | null
+          company_size?: string | null
           created_at?: string
           document?: string | null
+          education?: string | null
           email?: string
+          experience_years?: number | null
+          hourly_rate?: number | null
           id?: string
+          industry?: string | null
+          languages?: string | null
+          linkedin_url?: string | null
           name?: string
           phone?: string | null
+          portfolio_url?: string | null
+          postal_code?: string | null
+          specializations?: string | null
+          state?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }

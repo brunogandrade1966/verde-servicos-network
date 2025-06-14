@@ -14,8 +14,8 @@ import AvatarUpload from './AvatarUpload';
 interface ProfessionalProfileData {
   name: string;
   email: string;
-  phone: string;
-  document: string;
+  phone?: string;
+  document?: string;
   avatar_url?: string;
   bio?: string;
   education?: string;
@@ -135,7 +135,7 @@ const ProfessionalProfileForm = ({ profile, userId, onSave, loading }: Professio
                 <Label htmlFor="phone">Telefone</Label>
                 <Input
                   id="phone"
-                  value={formData.phone}
+                  value={formData.phone || ''}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="(11) 99999-9999"
                 />
@@ -144,7 +144,7 @@ const ProfessionalProfileForm = ({ profile, userId, onSave, loading }: Professio
                 <Label htmlFor="document">CPF</Label>
                 <Input
                   id="document"
-                  value={formData.document}
+                  value={formData.document || ''}
                   onChange={(e) => handleInputChange('document', e.target.value)}
                   placeholder="000.000.000-00"
                 />
