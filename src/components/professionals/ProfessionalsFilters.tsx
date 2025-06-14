@@ -31,6 +31,16 @@ const ProfessionalsFilters = ({
 }: ProfessionalsFiltersProps) => {
   const categories = [...new Set(services.map(s => s.category))];
 
+  const handleCategoryChange = (value: string) => {
+    // Convert "all" back to empty string for filtering logic
+    onCategoryChange(value === "all" ? "" : value);
+  };
+
+  const handleServiceChange = (value: string) => {
+    // Convert "all" back to empty string for filtering logic
+    onServiceChange(value === "all" ? "" : value);
+  };
+
   return (
     <Card className="mb-8">
       <CardHeader>
@@ -51,12 +61,12 @@ const ProfessionalsFilters = ({
             />
           </div>
           
-          <Select value={selectedCategory} onValueChange={onCategoryChange}>
+          <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione uma categoria" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
+              <SelectItem value="all">Todas as categorias</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}
@@ -65,12 +75,12 @@ const ProfessionalsFilters = ({
             </SelectContent>
           </Select>
 
-          <Select value={selectedService} onValueChange={onServiceChange}>
+          <Select value={selectedService || "all"} onValueChange={handleServiceChange}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione um serviço" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os serviços</SelectItem>
+              <SelectItem value="all">Todos os serviços</SelectItem>
               {services.map((service) => (
                 <SelectItem key={service.id} value={service.name}>
                   {service.name}
