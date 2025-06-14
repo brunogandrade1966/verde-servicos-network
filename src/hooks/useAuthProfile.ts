@@ -12,21 +12,37 @@ interface Profile {
   document?: string;
   avatar_url?: string;
   bio?: string;
+  // Informações de Contato
+  whatsapp?: string;
+  // Links Profissionais
+  website?: string;
+  linkedin_url?: string;
+  lattes_url?: string;
+  // Informações Profissionais
+  academic_title?: string;
+  area_of_expertise?: string;
+  skills?: string[];
+  education?: string;
+  // Registro Profissional
+  professional_entity?: string;
+  registration_number?: string;
+  // Endereço
+  postal_code?: string;
+  address?: string;
+  address_number?: string;
+  address_complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
   // Campos específicos do cliente
   company_name?: string;
   company_size?: string;
   industry?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  postal_code?: string;
   // Campos específicos do profissional
-  education?: string;
   experience_years?: number;
   specializations?: string[];
   certifications?: string[];
   languages?: string[];
-  linkedin_url?: string;
   portfolio_url?: string;
   availability?: string;
   hourly_rate?: number;
@@ -54,6 +70,7 @@ export const useAuthProfile = (user: User | null) => {
       // Parse campos JSON se existirem e não forem null
       const profileData = {
         ...data,
+        skills: data.skills ? JSON.parse(data.skills) : [],
         specializations: data.specializations ? JSON.parse(data.specializations) : [],
         certifications: data.certifications ? JSON.parse(data.certifications) : [],
         languages: data.languages ? JSON.parse(data.languages) : []

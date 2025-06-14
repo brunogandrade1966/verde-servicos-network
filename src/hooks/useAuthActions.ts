@@ -1,3 +1,4 @@
+
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -11,21 +12,37 @@ interface Profile {
   document?: string;
   avatar_url?: string;
   bio?: string;
+  // Informações de Contato
+  whatsapp?: string;
+  // Links Profissionais
+  website?: string;
+  linkedin_url?: string;
+  lattes_url?: string;
+  // Informações Profissionais
+  academic_title?: string;
+  area_of_expertise?: string;
+  skills?: string[];
+  education?: string;
+  // Registro Profissional
+  professional_entity?: string;
+  registration_number?: string;
+  // Endereço
+  postal_code?: string;
+  address?: string;
+  address_number?: string;
+  address_complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
   // Campos específicos do cliente
   company_name?: string;
   company_size?: string;
   industry?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  postal_code?: string;
   // Campos específicos do profissional
-  education?: string;
   experience_years?: number;
   specializations?: string[];
   certifications?: string[];
   languages?: string[];
-  linkedin_url?: string;
   portfolio_url?: string;
   availability?: string;
   hourly_rate?: number;
@@ -113,6 +130,7 @@ export const useAuthActions = (user: User | null, fetchUserProfile: (userId: str
       // Converter arrays para JSON strings antes de salvar
       const dataToUpdate = {
         ...updates,
+        skills: updates.skills ? JSON.stringify(updates.skills) : undefined,
         specializations: updates.specializations ? JSON.stringify(updates.specializations) : undefined,
         certifications: updates.certifications ? JSON.stringify(updates.certifications) : undefined,
         languages: updates.languages ? JSON.stringify(updates.languages) : undefined

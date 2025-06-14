@@ -146,7 +146,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academic_title: string | null
           address: string | null
+          address_complement: string | null
+          address_number: string | null
+          area_of_expertise: string | null
           availability: string | null
           avatar_url: string | null
           bio: string | null
@@ -163,18 +167,29 @@ export type Database = {
           id: string
           industry: string | null
           languages: string | null
+          lattes_url: string | null
           linkedin_url: string | null
           name: string
+          neighborhood: string | null
           phone: string | null
           portfolio_url: string | null
           postal_code: string | null
+          professional_entity: string | null
+          registration_number: string | null
+          skills: string | null
           specializations: string | null
           state: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
+          website: string | null
+          whatsapp: string | null
         }
         Insert: {
+          academic_title?: string | null
           address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
+          area_of_expertise?: string | null
           availability?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -191,18 +206,29 @@ export type Database = {
           id: string
           industry?: string | null
           languages?: string | null
+          lattes_url?: string | null
           linkedin_url?: string | null
           name: string
+          neighborhood?: string | null
           phone?: string | null
           portfolio_url?: string | null
           postal_code?: string | null
+          professional_entity?: string | null
+          registration_number?: string | null
+          skills?: string | null
           specializations?: string | null
           state?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+          website?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          academic_title?: string | null
           address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
+          area_of_expertise?: string | null
           availability?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -219,15 +245,22 @@ export type Database = {
           id?: string
           industry?: string | null
           languages?: string | null
+          lattes_url?: string | null
           linkedin_url?: string | null
           name?: string
+          neighborhood?: string | null
           phone?: string | null
           portfolio_url?: string | null
           postal_code?: string | null
+          professional_entity?: string | null
+          registration_number?: string | null
+          skills?: string | null
           specializations?: string | null
           state?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+          website?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
