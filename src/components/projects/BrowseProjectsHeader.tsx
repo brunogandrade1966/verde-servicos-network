@@ -17,8 +17,8 @@ const BrowseProjectsHeader = () => {
             </Button>
             <Leaf className="h-8 w-8 text-green-600" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Projetos Disponíveis</h1>
-              <p className="text-sm text-gray-500">Encontre projetos para aplicar suas habilidades</p>
+              <h1 className="text-xl font-bold text-gray-900">Demandas Disponíveis</h1>
+              <p className="text-sm text-gray-500">Encontre demandas para aplicar suas habilidades</p>
             </div>
           </div>
         </div>

@@ -53,7 +53,7 @@ const ProfessionalDashboard = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch open projects
+      // Fetch open projects (client demands)
       const { data: projectsData, error: projectsError } = await supabase
         .from('projects')
         .select(`
@@ -67,7 +67,7 @@ const ProfessionalDashboard = () => {
 
       if (projectsError) {
         toast({
-          title: "Erro ao carregar projetos",
+          title: "Erro ao carregar demandas",
           description: projectsError.message,
           variant: "destructive"
         });
@@ -82,6 +82,7 @@ const ProfessionalDashboard = () => {
           *,
           projects(title, status)
         `)
+        .eq('professional_id', profile?.id)
         .order('created_at', { ascending: false });
 
       if (applicationsError) {

@@ -22,6 +22,7 @@ interface Project {
   deadline?: string;
   location?: string;
   created_at: string;
+  client_id: string;
   services: {
     name: string;
     category: string;
@@ -83,11 +84,16 @@ const ProjectDetails = () => {
 
       if (error) {
         toast({
-          title: "Erro ao carregar projeto",
+          title: "Erro ao carregar demanda",
           description: error.message,
           variant: "destructive"
         });
         return;
+      }
+
+      // Se o usuário é profissional, não mostrar as candidaturas de outros profissionais
+      if (profile?.user_type === 'professional' && data) {
+        data.applications = [];
       }
 
       setProject(data);
@@ -134,7 +140,10 @@ const ProjectDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <ProjectInfo project={project} />
-            <ProjectApplications applications={project.applications} profile={profile} />
+            {/* Só mostrar candidaturas se o usuário for o cliente dono da demanda */}
+            {profile?.user_type === 'client' && profile?.id === project.client_id && (
+              <ProjectApplications applications={project.applications} profile={profile} />
+            )}
           </div>
           <ProjectSidebar project={project} profile={profile} />
         </div>

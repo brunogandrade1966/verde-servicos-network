@@ -41,7 +41,7 @@ const RecentProjects = ({ projects, loading }: RecentProjectsProps) => {
   if (loading) {
     return (
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Projetos Recentes</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandas Recentes</h2>
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
         </div>
@@ -52,14 +52,14 @@ const RecentProjects = ({ projects, loading }: RecentProjectsProps) => {
   if (projects.length === 0) {
     return (
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Projetos Recentes</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandas Recentes</h2>
         <Card>
           <CardContent className="text-center py-8">
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Nenhum projeto disponível
+              Nenhuma demanda disponível
             </h3>
             <p className="text-gray-500">
-              Não há projetos abertos no momento.
+              Não há demandas abertas no momento.
             </p>
           </CardContent>
         </Card>
@@ -69,7 +69,7 @@ const RecentProjects = ({ projects, loading }: RecentProjectsProps) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Projetos Recentes</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandas Recentes</h2>
       <div className="space-y-4">
         {projects.slice(0, 5).map((project) => (
           <Card key={project.id} className="hover:shadow-md transition-shadow">
@@ -101,7 +101,7 @@ const RecentProjects = ({ projects, loading }: RecentProjectsProps) => {
                   </span>
                 )}
                 <Button variant="outline" size="sm" onClick={() => navigate(`/projects/${project.id}`)}>
-                  Ver Projeto
+                  Ver Demanda
                 </Button>
               </div>
             </CardContent>
