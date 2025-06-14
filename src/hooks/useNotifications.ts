@@ -22,6 +22,7 @@ export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchNotifications = async () => {
     if (!profile?.id) return;
@@ -125,11 +126,15 @@ export const useNotifications = () => {
 
     fetchNotifications();
 
-    // Clean up any existing channel first
-    if (channelRef.current) {
+    // Clean up any existing subscription
+    if (channelRef.current && isSubscribedRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
+      isSubscribedRef.current = false;
     }
+
+    // Prevent multiple subscriptions
+    if (isSubscribedRef.current) return;
 
     const channel = supabase
       .channel(`notifications-${profile.id}-${Date.now()}`)
@@ -168,14 +173,19 @@ export const useNotifications = () => {
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
 
     channelRef.current = channel;
 
     return () => {
-      if (channelRef.current) {
+      if (channelRef.current && isSubscribedRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        isSubscribedRef.current = false;
       }
     };
   }, [profile?.id, toast]);

@@ -24,6 +24,7 @@ export const useMessaging = (conversationId?: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchMessages = async () => {
     if (!conversationId) return;
@@ -149,11 +150,15 @@ export const useMessaging = (conversationId?: string) => {
 
     fetchMessages();
 
-    // Clean up any existing channel first
-    if (channelRef.current) {
+    // Clean up any existing subscription
+    if (channelRef.current && isSubscribedRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
+      isSubscribedRef.current = false;
     }
+
+    // Prevent multiple subscriptions
+    if (isSubscribedRef.current) return;
 
     const channel = supabase
       .channel(`messages-${conversationId}-${Date.now()}`)
@@ -205,14 +210,19 @@ export const useMessaging = (conversationId?: string) => {
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
 
     channelRef.current = channel;
 
     return () => {
-      if (channelRef.current) {
+      if (channelRef.current && isSubscribedRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        isSubscribedRef.current = false;
       }
     };
   }, [conversationId, profile?.id]);
