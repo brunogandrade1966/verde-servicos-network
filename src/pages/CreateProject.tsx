@@ -1,9 +1,10 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ProjectHeader } from '@/components/project/ProjectHeader';
 import { ProjectForm } from '@/components/project/ProjectForm';
 import { useServices } from '@/hooks/useServices';
+import ClientLayout from '@/components/layout/ClientLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const CreateProject = () => {
   const { profile } = useAuth();
@@ -16,9 +17,11 @@ const CreateProject = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
+      <ClientLayout>
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+      </ClientLayout>
     );
   }
 
@@ -27,16 +30,23 @@ const CreateProject = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <ProjectHeader />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ProjectForm
-          services={services}
-          profileId={profile.id}
-          onSuccess={handleSuccess}
-        />
-      </main>
-    </div>
+    <ClientLayout>
+      <Card>
+        <CardHeader>
+          <CardTitle>Criar Nova Demanda</CardTitle>
+          <CardDescription>
+            Publique uma nova demanda de serviço ambiental
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProjectForm
+            services={services}
+            profileId={profile.id}
+            onSuccess={handleSuccess}
+          />
+        </CardContent>
+      </Card>
+    </ClientLayout>
   );
 };
 

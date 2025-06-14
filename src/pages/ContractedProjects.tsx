@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import ContractedProjectsHeader from '@/components/projects/ContractedProjectsHeader';
 import ContractedProjectsGrid from '@/components/projects/ContractedProjectsGrid';
 import ContractedProjectsEmpty from '@/components/projects/ContractedProjectsEmpty';
+import ClientLayout from '@/components/layout/ClientLayout';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectStatus = Database['public']['Enums']['project_status'];
@@ -95,27 +94,25 @@ const ContractedProjects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
+      <ClientLayout>
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+      </ClientLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <ContractedProjectsHeader />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {projects.length === 0 ? (
-          <ContractedProjectsEmpty userType={profile?.user_type} />
-        ) : (
-          <ContractedProjectsGrid 
-            projects={projects} 
-            userType={profile?.user_type} 
-          />
-        )}
-      </main>
-    </div>
+    <ClientLayout>
+      {projects.length === 0 ? (
+        <ContractedProjectsEmpty userType={profile?.user_type} />
+      ) : (
+        <ContractedProjectsGrid 
+          projects={projects} 
+          userType={profile?.user_type} 
+        />
+      )}
+    </ClientLayout>
   );
 };
 

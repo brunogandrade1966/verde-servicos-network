@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import FindProfessionalsHeader from '@/components/professionals/FindProfessionalsHeader';
 import ProfessionalsFilters from '@/components/professionals/ProfessionalsFilters';
 import ProfessionalsGrid from '@/components/professionals/ProfessionalsGrid';
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface Professional {
   id: string;
@@ -126,38 +125,34 @@ const FindProfessionals = () => {
   const states = [...new Set(professionals.map(p => p.state).filter(Boolean))].sort();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <FindProfessionalsHeader />
+    <ClientLayout>
+      <ProfessionalsFilters
+        searchQuery={searchQuery}
+        selectedService={selectedService}
+        selectedCategory={selectedCategory}
+        selectedCity={selectedCity}
+        selectedState={selectedState}
+        services={services}
+        cities={cities}
+        states={states}
+        onSearchChange={setSearchQuery}
+        onServiceChange={setSelectedService}
+        onCategoryChange={setSelectedCategory}
+        onCityChange={setSelectedCity}
+        onStateChange={setSelectedState}
+      />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ProfessionalsFilters
-          searchQuery={searchQuery}
-          selectedService={selectedService}
-          selectedCategory={selectedCategory}
-          selectedCity={selectedCity}
-          selectedState={selectedState}
-          services={services}
-          cities={cities}
-          states={states}
-          onSearchChange={setSearchQuery}
-          onServiceChange={setSelectedService}
-          onCategoryChange={setSelectedCategory}
-          onCityChange={setSelectedCity}
-          onStateChange={setSelectedState}
-        />
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Profissionais Disponíveis
+        </h2>
+        <p className="text-gray-600">
+          {filteredProfessionals.length} profissional{filteredProfessionals.length !== 1 ? 'is' : ''} encontrado{filteredProfessionals.length !== 1 ? 's' : ''}
+        </p>
+      </div>
 
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Profissionais Disponíveis
-          </h2>
-          <p className="text-gray-600">
-            {filteredProfessionals.length} profissional{filteredProfessionals.length !== 1 ? 'is' : ''} encontrado{filteredProfessionals.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-
-        <ProfessionalsGrid professionals={filteredProfessionals} loading={loading} />
-      </main>
-    </div>
+      <ProfessionalsGrid professionals={filteredProfessionals} loading={loading} />
+    </ClientLayout>
   );
 };
 

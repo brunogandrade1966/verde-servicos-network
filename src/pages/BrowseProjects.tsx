@@ -1,10 +1,9 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import BrowseProjectsHeader from '@/components/projects/BrowseProjectsHeader';
 import ProjectFilters from '@/components/projects/ProjectFilters';
 import ProjectsGrid from '@/components/projects/ProjectsGrid';
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface Project {
   id: string;
@@ -114,38 +113,34 @@ const BrowseProjects = () => {
   }, [projects, searchTerm, selectedCategory, selectedService]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <BrowseProjectsHeader />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1">
-            <ProjectFilters
-              searchTerm={searchTerm}
-              selectedCategory={selectedCategory}
-              selectedService={selectedService}
-              services={services}
-              onSearchChange={setSearchTerm}
-              onCategoryChange={setSelectedCategory}
-              onServiceChange={setSelectedService}
-            />
-          </div>
-
-          <div className="lg:col-span-3">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Projetos Disponíveis
-              </h2>
-              <p className="text-gray-600">
-                {filteredProjects.length} projeto(s) encontrado(s)
-              </p>
-            </div>
-
-            <ProjectsGrid projects={filteredProjects} loading={loading} />
-          </div>
+    <ClientLayout>
+      <div className="grid lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-1">
+          <ProjectFilters
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+            selectedService={selectedService}
+            services={services}
+            onSearchChange={setSearchTerm}
+            onCategoryChange={setSelectedCategory}
+            onServiceChange={setSelectedService}
+          />
         </div>
-      </main>
-    </div>
+
+        <div className="lg:col-span-3">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Projetos Disponíveis
+            </h2>
+            <p className="text-gray-600">
+              {filteredProjects.length} projeto(s) encontrado(s)
+            </p>
+          </div>
+
+          <ProjectsGrid projects={filteredProjects} loading={loading} />
+        </div>
+      </div>
+    </ClientLayout>
   );
 };
 
