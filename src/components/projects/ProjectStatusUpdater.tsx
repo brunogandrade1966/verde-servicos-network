@@ -31,7 +31,7 @@ const ProjectStatusUpdater = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const getAvailableStatuses = (): Record<ProjectStatus, string> => {
+  const getAvailableStatuses = (): Partial<Record<ProjectStatus, string>> => {
     const baseStatuses = {
       draft: 'Rascunho',
       open: 'Aberto',

@@ -3,10 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import ProjectStatusBadge from './ProjectStatusBadge';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface Project {
   id: string;
-  status: string;
+  status: ProjectStatus;
   created_at: string;
   client_id: string;
   services: {
