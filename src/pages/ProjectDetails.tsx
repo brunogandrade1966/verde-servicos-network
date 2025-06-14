@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,6 +47,7 @@ interface Application {
   estimated_duration?: string;
   created_at: string;
   profiles: {
+    id: string;
     name: string;
     bio?: string;
     avatar_url?: string;
