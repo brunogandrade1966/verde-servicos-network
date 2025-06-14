@@ -1,8 +1,9 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import ClientDashboard from '@/components/dashboards/ClientDashboard';
+import NewClientDashboard from '@/components/dashboards/NewClientDashboard';
 import ProfessionalDashboard from '@/components/dashboards/ProfessionalDashboard';
 import AdminDashboard from '@/components/dashboards/AdminDashboard';
+import ClientLayout from '@/components/layout/ClientLayout';
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -42,13 +43,21 @@ const Dashboard = () => {
 
   switch (profile.user_type) {
     case 'client':
-      return <ClientDashboard />;
+      return (
+        <ClientLayout>
+          <NewClientDashboard />
+        </ClientLayout>
+      );
     case 'professional':
       return <ProfessionalDashboard />;
     case 'admin':
       return <AdminDashboard />;
     default:
-      return <ClientDashboard />;
+      return (
+        <ClientLayout>
+          <NewClientDashboard />
+        </ClientLayout>
+      );
   }
 };
 
