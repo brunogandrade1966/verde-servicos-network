@@ -1,16 +1,19 @@
 
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Leaf, ArrowLeft, Users, Briefcase, Shield } from "lucide-react";
+import { Leaf, ArrowLeft, Users, Briefcase, Shield, Loader2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 
 const Register = () => {
+  const { signUp } = useAuth();
   const [searchParams] = useSearchParams();
   const [userType, setUserType] = useState(searchParams.get("type") || "client");
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,10 +23,25 @@ const Register = () => {
     document: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementar registro com Supabase
-    console.log("Register attempt:", { ...formData, userType });
+    
+    if (formData.password !== formData.confirmPassword) {
+      return;
+    }
+
+    setLoading(true);
+
+    const userData = {
+      name: formData.name,
+      phone: formData.phone,
+      document: formData.document,
+      user_type: userType
+    };
+
+    const { error } = await signUp(formData.email, formData.password, userData);
+    
+    setLoading(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -82,7 +100,7 @@ const Register = () => {
                     const Icon = type.icon;
                     return (
                       <div key={type.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
-                        <RadioGroupItem value={type.id} id={type.id} />
+                        <RadioGroupItem value={type.id} id={type.id} disabled={loading} />
                         <Icon className="h-5 w-5 text-green-600" />
                         <div className="flex-1">
                           <Label htmlFor={type.id} className="font-medium cursor-pointer">
@@ -106,6 +124,7 @@ const Register = () => {
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
                 
@@ -118,6 +137,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -128,7 +148,7 @@ const Register = () => {
                     placeholder="(11) 99999-9999"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    required
+                    disabled={loading}
                   />
                 </div>
 
@@ -141,7 +161,7 @@ const Register = () => {
                     placeholder={userType === "client" ? "000.000.000-00 ou 00.000.000/0001-00" : "000.000.000-00"}
                     value={formData.document}
                     onChange={(e) => handleInputChange("document", e.target.value)}
-                    required
+                    disabled={loading}
                   />
                 </div>
 
@@ -154,6 +174,7 @@ const Register = () => {
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -166,12 +187,24 @@ const Register = () => {
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                Criar Conta
+              <Button 
+                type="submit" 
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={loading || formData.password !== formData.confirmPassword}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Criando Conta...
+                  </>
+                ) : (
+                  "Criar Conta"
+                )}
               </Button>
             </form>
             
