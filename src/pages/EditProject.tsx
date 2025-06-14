@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,7 +27,7 @@ const EditProject = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: services = [] } = useServices();
+  const { services = [] } = useServices();
   
   const [loading, setLoading] = useState(false);
   const [loadingProject, setLoadingProject] = useState(true);
@@ -41,7 +40,7 @@ const EditProject = () => {
     budget_max: '',
     deadline: '',
     location: '',
-    status: 'draft' as const
+    status: 'draft' as 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled'
   });
 
   useEffect(() => {
@@ -87,7 +86,7 @@ const EditProject = () => {
         budget_max: data.budget_max ? data.budget_max.toString() : '',
         deadline: data.deadline || '',
         location: data.location || '',
-        status: data.status
+        status: data.status as 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled'
       });
     } catch (error) {
       console.error('Error fetching project:', error);
