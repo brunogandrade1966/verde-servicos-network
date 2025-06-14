@@ -43,6 +43,8 @@ const ProfessionalDashboard = () => {
   const { profile, signOut } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [partnershipsCount, setPartnershipsCount] = useState(0);
+  const [partnershipApplicationsCount, setPartnershipApplicationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -75,6 +77,16 @@ const ProfessionalDashboard = () => {
         setProjects(projectsData || []);
       }
 
+      // Fetch partnership demands count
+      const { count: partnershipsCount, error: partnershipsError } = await supabase
+        .from('partnership_demands')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'open');
+
+      if (!partnershipsError) {
+        setPartnershipsCount(partnershipsCount || 0);
+      }
+
       // Fetch user applications
       const { data: applicationsData, error: applicationsError } = await supabase
         .from('applications')
@@ -93,6 +105,16 @@ const ProfessionalDashboard = () => {
         });
       } else {
         setApplications(applicationsData || []);
+      }
+
+      // Fetch partnership applications count
+      const { count: partnershipAppsCount, error: partnershipAppsError } = await supabase
+        .from('partnership_applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('professional_id', profile?.id);
+
+      if (!partnershipAppsError) {
+        setPartnershipApplicationsCount(partnershipAppsCount || 0);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -117,7 +139,9 @@ const ProfessionalDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardStats 
           applications={applications} 
-          projectsCount={projects.length} 
+          projectsCount={projects.length}
+          partnershipsCount={partnershipsCount}
+          partnershipApplicationsCount={partnershipApplicationsCount}
         />
 
         <DashboardNavigation />

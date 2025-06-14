@@ -15,9 +15,16 @@ interface Application {
 interface DashboardStatsProps {
   applications: Application[];
   projectsCount: number;
+  partnershipsCount?: number;
+  partnershipApplicationsCount?: number;
 }
 
-const DashboardStats = ({ applications, projectsCount }: DashboardStatsProps) => {
+const DashboardStats = ({ 
+  applications, 
+  projectsCount, 
+  partnershipsCount = 0,
+  partnershipApplicationsCount = 0
+}: DashboardStatsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <Card>
@@ -39,17 +46,17 @@ const DashboardStats = ({ applications, projectsCount }: DashboardStatsProps) =>
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl font-bold text-orange-600">
-            {applications.filter(a => a.status === 'accepted').length}
+            {partnershipApplicationsCount}
           </CardTitle>
-          <CardDescription>Candidaturas Aceitas</CardDescription>
+          <CardDescription>Candidaturas Parcerias</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl font-bold text-purple-600">
-            {projectsCount}
+            {projectsCount + partnershipsCount}
           </CardTitle>
-          <CardDescription>Novas Demandas</CardDescription>
+          <CardDescription>Demandas Disponíveis</CardDescription>
         </CardHeader>
       </Card>
     </div>

@@ -1,133 +1,72 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { Toaster } from '@/components/ui/toaster';
-import ProtectedRoute from '@/components/ProtectedRoute';
-
-// Import pages
-import Index from '@/pages/Index';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import Dashboard from '@/pages/Dashboard';
-import CreateProject from '@/pages/CreateProject';
-import EditProject from '@/pages/EditProject';
-import ProjectDetails from '@/pages/ProjectDetails';
-import BrowseProjects from '@/pages/BrowseProjects';
-import ApplyToProject from '@/pages/ApplyToProject';
-import FindProfessionals from '@/pages/FindProfessionals';
-import ProfessionalProfile from '@/pages/ProfessionalProfile';
-import ProfessionalProfileView from '@/pages/ProfessionalProfileView';
-import Messages from '@/pages/Messages';
-import ManageServices from '@/pages/ManageServices';
-import NotFound from '@/pages/NotFound';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import CreateProject from "./pages/CreateProject";
+import EditProject from "./pages/EditProject";
+import BrowseProjects from "./pages/BrowseProjects";
+import ProjectDetails from "./pages/ProjectDetails";
+import ApplyToProject from "./pages/ApplyToProject";
+import FindProfessionals from "./pages/FindProfessionals";
+import ProfessionalProfile from "./pages/ProfessionalProfile";
+import ProfessionalProfileView from "./pages/ProfessionalProfileView";
+import Messages from "./pages/Messages";
+import ManageServices from "./pages/ManageServices";
+import Partnerships from "./pages/Partnerships";
+import PartnershipDetails from "./pages/PartnershipDetails";
+import ApplyToPartnership from "./pages/ApplyToPartnership";
+import CreatePartnershipDemandForm from "./components/partnerships/CreatePartnershipDemandForm";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/projects/create"
-                element={
-                  <ProtectedRoute>
-                    <CreateProject />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/projects/:id/edit"
-                element={
-                  <ProtectedRoute>
-                    <EditProject />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/projects/:id"
-                element={
-                  <ProtectedRoute>
-                    <ProjectDetails />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/projects"
-                element={
-                  <ProtectedRoute>
-                    <BrowseProjects />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/projects/:id/apply"
-                element={
-                  <ProtectedRoute>
-                    <ApplyToProject />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/professionals"
-                element={
-                  <ProtectedRoute>
-                    <FindProfessionals />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/professionals/:id"
-                element={
-                  <ProtectedRoute>
-                    <ProfessionalProfileView />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfessionalProfile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/messages"
-                element={
-                  <ProtectedRoute>
-                    <Messages />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/services"
-                element={
-                  <ProtectedRoute>
-                    <ManageServices />
-                  </ProtectedRoute>
-                }
-              />
+
+              {/* Protected routes */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
+              <Route path="/projects/:id/edit" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
+              <Route path="/projects" element={<ProtectedRoute><BrowseProjects /></ProtectedRoute>} />
+              <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
+              <Route path="/projects/:id/apply" element={<ProtectedRoute><ApplyToProject /></ProtectedRoute>} />
+              <Route path="/professionals" element={<ProtectedRoute><FindProfessionals /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfessionalProfile /></ProtectedRoute>} />
+              <Route path="/professionals/:id" element={<ProtectedRoute><ProfessionalProfileView /></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+              <Route path="/my-services" element={<ProtectedRoute><ManageServices /></ProtectedRoute>} />
+              
+              {/* Partnership routes */}
+              <Route path="/partnerships" element={<ProtectedRoute><Partnerships /></ProtectedRoute>} />
+              <Route path="/partnerships/create" element={<ProtectedRoute><CreatePartnershipDemandForm /></ProtectedRoute>} />
+              <Route path="/partnerships/:id" element={<ProtectedRoute><PartnershipDetails /></ProtectedRoute>} />
+              <Route path="/partnerships/:id/apply" element={<ProtectedRoute><ApplyToPartnership /></ProtectedRoute>} />
+
+              {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </div>
-          <Toaster />
-        </Router>
-      </AuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

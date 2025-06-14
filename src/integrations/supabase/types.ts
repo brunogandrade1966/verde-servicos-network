@@ -141,6 +141,123 @@ export type Database = {
           },
         ]
       }
+      partnership_applications: {
+        Row: {
+          created_at: string
+          estimated_duration: string | null
+          id: string
+          partnership_demand_id: string
+          professional_id: string
+          proposal: string
+          proposed_price: number | null
+          status: Database["public"]["Enums"]["application_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_duration?: string | null
+          id?: string
+          partnership_demand_id: string
+          professional_id: string
+          proposal: string
+          proposed_price?: number | null
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_duration?: string | null
+          id?: string
+          partnership_demand_id?: string
+          professional_id?: string
+          proposal?: string
+          proposed_price?: number | null
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_applications_partnership_demand_id_fkey"
+            columns: ["partnership_demand_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_demands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_applications_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_demands: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          collaboration_type: string
+          created_at: string
+          deadline: string | null
+          description: string
+          id: string
+          location: string | null
+          professional_id: string
+          required_skills: string | null
+          service_id: string
+          status: Database["public"]["Enums"]["project_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          collaboration_type: string
+          created_at?: string
+          deadline?: string | null
+          description: string
+          id?: string
+          location?: string | null
+          professional_id: string
+          required_skills?: string | null
+          service_id: string
+          status?: Database["public"]["Enums"]["project_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          collaboration_type?: string
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          location?: string | null
+          professional_id?: string
+          required_skills?: string | null
+          service_id?: string
+          status?: Database["public"]["Enums"]["project_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_demands_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_demands_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partnerships: {
         Row: {
           created_at: string
