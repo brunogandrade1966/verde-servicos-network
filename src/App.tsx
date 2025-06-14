@@ -11,6 +11,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateProject from "./pages/CreateProject";
 import ProjectDetails from "./pages/ProjectDetails";
+import BrowseProjects from "./pages/BrowseProjects";
+import ApplyToProject from "./pages/ApplyToProject";
 import FindProfessionals from "./pages/FindProfessionals";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";

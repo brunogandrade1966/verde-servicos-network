@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -191,9 +190,9 @@ const ProfessionalDashboard = () => {
             <Search className="h-4 w-4 mr-2" />
             Buscar Projetos
           </Button>
-          <Button variant="outline" onClick={() => navigate('/partnerships')}>
+          <Button variant="outline" onClick={() => navigate('/professionals')}>
             <Users className="h-4 w-4 mr-2" />
-            Parcerias
+            Encontrar Profissionais
           </Button>
           <Button variant="outline" onClick={() => navigate('/my-services')}>
             <Briefcase className="h-4 w-4 mr-2" />
