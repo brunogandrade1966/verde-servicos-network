@@ -22,7 +22,7 @@ const StartPartnershipConversation = ({
 }: StartPartnershipConversationProps) => {
   const [loading, setLoading] = useState(false);
   const { profile } = useAuth();
-  const { createPartnershipConversation } = useConversations(profile?.id);
+  const { createConversation } = useConversations(profile?.id);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -31,10 +31,10 @@ const StartPartnershipConversation = ({
 
     setLoading(true);
     try {
-      const conversation = await createPartnershipConversation(
-        partnershipDemandId,
+      const conversation = await createConversation(
         creatorId,
-        applicantId
+        applicantId,
+        partnershipDemandId
       );
 
       if (conversation) {
