@@ -24,6 +24,36 @@ const ImportServices = () => {
 
   const parseCSV = (text: string): ServiceData[] => {
     const lines = text.split('\n').filter(line => line.trim());
+    
+    // Se for um INSERT SQL, extrair os valores
+    if (text.includes('INSERT INTO')) {
+      const services: ServiceData[] = [];
+      
+      // Regex para extrair VALUES de cada linha INSERT
+      const insertRegex = /INSERT INTO[^(]+\([^)]+\)\s+VALUES\s*\(([^)]+)\)/gi;
+      let match;
+      
+      while ((match = insertRegex.exec(text)) !== null) {
+        const valuesString = match[1];
+        // Dividir por vírgula respeitando aspas
+        const values = valuesString.split(/,(?=(?:[^']*'[^']*')*[^']*$)/)
+          .map(v => v.trim().replace(/^'|'$/g, ''));
+        
+        if (values.length >= 4) {
+          services.push({
+            id: values[0],
+            name: values[1],
+            description: values[2],
+            categoryid: values[3],
+            created_at: values[4] || new Date().toISOString()
+          });
+        }
+      }
+      
+      return services;
+    }
+    
+    // Se for CSV normal
     const headers = lines[0].split(',').map(h => h.trim());
     
     return lines.slice(1).map(line => {
@@ -40,12 +70,12 @@ const ImportServices = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
+    if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.sql'))) {
       setFile(selectedFile);
     } else {
       toast({
         title: "Arquivo inválido",
-        description: "Por favor, selecione um arquivo CSV.",
+        description: "Por favor, selecione um arquivo CSV ou SQL.",
         variant: "destructive"
       });
     }
@@ -116,7 +146,7 @@ const ImportServices = () => {
       console.error('Erro ao processar arquivo:', error);
       toast({
         title: "Erro na importação",
-        description: "Erro ao processar o arquivo CSV.",
+        description: "Erro ao processar o arquivo.",
         variant: "destructive"
       });
     } finally {
@@ -133,22 +163,22 @@ const ImportServices = () => {
           <span>Importar Serviços Ambientais</span>
         </CardTitle>
         <CardDescription>
-          Faça upload do arquivo CSV com os serviços ambientais predefinidos
+          Faça upload do arquivo CSV ou SQL com os serviços ambientais predefinidos
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="csv-file">Arquivo CSV</Label>
+          <Label htmlFor="csv-file">Arquivo CSV ou SQL</Label>
           <Input
             id="csv-file"
             type="file"
-            accept=".csv"
+            accept=".csv,.sql"
             onChange={handleFileChange}
             disabled={loading}
           />
           <p className="text-sm text-gray-500">
-            Formato esperado: id, name, description, categoryid, created_at
+            Formatos aceitos: CSV (id, name, description, categoryid, created_at) ou arquivos SQL com INSERT statements
           </p>
         </div>
 
