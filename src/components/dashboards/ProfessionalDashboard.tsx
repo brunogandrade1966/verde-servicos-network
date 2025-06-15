@@ -28,12 +28,39 @@ interface Project {
   };
 }
 
-interface Application {
+interface ProjectApplication {
   id: string;
   status: string;
   proposed_price?: number;
   created_at: string;
   projects: {
+    title: string;
+    status: string;
+  };
+}
+
+interface PartnershipApplication {
+  id: string;
+  status: string;
+  proposed_price?: number;
+  created_at: string;
+  partnership_demands: {
+    title: string;
+    status: string;
+  };
+}
+
+interface ApplicationData {
+  id: string;
+  status: string;
+  proposed_price?: number;
+  created_at: string;
+  type: 'project' | 'partnership';
+  projects?: {
+    title: string;
+    status: string;
+  };
+  partnership_demands?: {
     title: string;
     status: string;
   };
@@ -66,7 +93,7 @@ interface ActivePartnership {
 const ProfessionalDashboard = () => {
   const { profile } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<ApplicationData[]>([]);
   const [activeProjects, setActiveProjects] = useState<ActiveProject[]>([]);
   const [activePartnerships, setActivePartnerships] = useState<ActivePartnership[]>([]);
   const [partnershipsCount, setPartnershipsCount] = useState(0);
@@ -160,8 +187,8 @@ const ProfessionalDashboard = () => {
         setPartnershipsCount(partnershipsCount || 0);
       }
 
-      // Fetch user applications
-      const { data: applicationsData, error: applicationsError } = await supabase
+      // Fetch user project applications
+      const { data: projectApplicationsData, error: projectApplicationsError } = await supabase
         .from('applications')
         .select(`
           *,
@@ -170,15 +197,55 @@ const ProfessionalDashboard = () => {
         .eq('professional_id', profile?.id)
         .order('created_at', { ascending: false });
 
-      if (applicationsError) {
+      // Fetch user partnership applications
+      const { data: partnershipApplicationsData, error: partnershipApplicationsError } = await supabase
+        .from('partnership_applications')
+        .select(`
+          *,
+          partnership_demands(title, status)
+        `)
+        .eq('professional_id', profile?.id)
+        .order('created_at', { ascending: false });
+
+      // Combine applications with type information
+      const allApplications: ApplicationData[] = [];
+
+      if (projectApplicationsData) {
+        const projectApps = projectApplicationsData.map((app: ProjectApplication) => ({
+          ...app,
+          type: 'project' as const
+        }));
+        allApplications.push(...projectApps);
+      }
+
+      if (partnershipApplicationsData) {
+        const partnershipApps = partnershipApplicationsData.map((app: PartnershipApplication) => ({
+          ...app,
+          type: 'partnership' as const
+        }));
+        allApplications.push(...partnershipApps);
+      }
+
+      // Sort all applications by creation date
+      allApplications.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      if (projectApplicationsError) {
         toast({
-          title: "Erro ao carregar candidaturas",
-          description: applicationsError.message,
+          title: "Erro ao carregar candidaturas de projetos",
+          description: projectApplicationsError.message,
           variant: "destructive"
         });
-      } else {
-        setApplications(applicationsData || []);
       }
+
+      if (partnershipApplicationsError) {
+        toast({
+          title: "Erro ao carregar candidaturas de parcerias",
+          description: partnershipApplicationsError.message,
+          variant: "destructive"
+        });
+      }
+
+      setApplications(allApplications);
 
       // Fetch partnership applications count
       const { count: partnershipAppsCount, error: partnershipAppsError } = await supabase
