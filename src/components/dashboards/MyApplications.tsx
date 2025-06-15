@@ -4,16 +4,31 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-interface Application {
+interface ProjectApplication {
   id: string;
   status: string;
   proposed_price?: number;
   created_at: string;
+  type: 'project';
   projects: {
     title: string;
     status: string;
   };
 }
+
+interface PartnershipApplication {
+  id: string;
+  status: string;
+  proposed_price?: number;
+  created_at: string;
+  type: 'partnership';
+  partnership_demands: {
+    title: string;
+    status: string;
+  };
+}
+
+type Application = ProjectApplication | PartnershipApplication;
 
 interface MyApplicationsProps {
   applications: Application[];
@@ -36,6 +51,17 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
     }
   };
 
+  const getTypeBadge = (type: string) => {
+    switch (type) {
+      case 'project':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Projeto</Badge>;
+      case 'partnership':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">Parceria</Badge>;
+      default:
+        return <Badge variant="outline">{type}</Badge>;
+    }
+  };
+
   const formatCurrency = (amount?: number) => {
     if (!amount) return 'Não informado';
     return new Intl.NumberFormat('pt-BR', {
@@ -50,6 +76,21 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
       month: '2-digit',
       year: 'numeric'
     });
+  };
+
+  const getTitle = (application: Application) => {
+    if (application.type === 'project') {
+      return application.projects.title;
+    }
+    return application.partnership_demands.title;
+  };
+
+  const handleViewDetails = (application: Application) => {
+    if (application.type === 'project') {
+      navigate('/projects');
+    } else {
+      navigate('/partnerships');
+    }
   };
 
   if (loading) {
@@ -73,11 +114,16 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
               Nenhuma candidatura enviada
             </h3>
             <p className="text-gray-500 mb-4">
-              Você ainda não se candidatou a nenhuma demanda.
+              Você ainda não se candidatou a nenhuma demanda ou projeto.
             </p>
-            <Button onClick={() => navigate('/projects')} className="bg-green-600 hover:bg-green-700">
-              Buscar Demandas
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => navigate('/projects')} className="bg-green-600 hover:bg-green-700">
+                Buscar Projetos
+              </Button>
+              <Button onClick={() => navigate('/partnerships')} variant="outline">
+                Buscar Parcerias
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -89,16 +135,19 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Minhas Candidaturas</h2>
       <div className="space-y-4">
         {applications.slice(0, 5).map((application) => (
-          <Card key={application.id} className="hover:shadow-md transition-shadow">
+          <Card key={`${application.type}-${application.id}`} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg">{application.projects.title}</CardTitle>
+                  <CardTitle className="text-lg">{getTitle(application)}</CardTitle>
                   <CardDescription className="mt-1">
                     Candidatura enviada em {formatDate(application.created_at)}
                   </CardDescription>
                 </div>
-                {getStatusBadge(application.status)}
+                <div className="flex gap-2">
+                  {getTypeBadge(application.type)}
+                  {getStatusBadge(application.status)}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -109,7 +158,7 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => navigate('/projects')}
+                  onClick={() => handleViewDetails(application)}
                 >
                   Ver Detalhes
                 </Button>
