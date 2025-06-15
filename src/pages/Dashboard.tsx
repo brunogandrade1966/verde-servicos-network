@@ -1,5 +1,6 @@
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 import NewClientDashboard from '@/components/dashboards/NewClientDashboard';
 import ProfessionalDashboard from '@/components/dashboards/ProfessionalDashboard';
 import AdminDashboard from '@/components/dashboards/AdminDashboard';
@@ -8,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
   const { profile, loading, user } = useAuth();
+  const location = useLocation();
 
   console.log('Dashboard - loading:', loading, 'user:', user, 'profile:', profile);
 
@@ -51,9 +53,17 @@ const Dashboard = () => {
     case 'professional':
       return <ProfessionalDashboard />;
     case 'admin':
-      // Usar AdminDashboard apenas para a rota /dashboard
-      // Para outras rotas admin, elas usarão ClientLayout
-      return <AdminDashboard />;
+      // Usar AdminDashboard apenas para a rota exata /dashboard
+      // Para outras rotas admin (como /admin/*), elas usarão ClientLayout
+      if (location.pathname === '/dashboard') {
+        return <AdminDashboard />;
+      }
+      // Para outras rotas, usar ClientLayout
+      return (
+        <ClientLayout>
+          <NewClientDashboard />
+        </ClientLayout>
+      );
     default:
       return (
         <ClientLayout>
