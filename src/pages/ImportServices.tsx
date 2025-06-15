@@ -1,0 +1,29 @@
+
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+import ClientLayout from '@/components/layout/ClientLayout';
+import ImportServices from '@/components/admin/ImportServices';
+
+const ImportServicesPage = () => {
+  const { profile } = useAuth();
+
+  // Verificar se o usuário é admin
+  if (profile?.user_type !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <ClientLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Importar Serviços</h1>
+          <p className="text-gray-600">Carregue os serviços ambientais predefinidos no sistema</p>
+        </div>
+        
+        <ImportServices />
+      </div>
+    </ClientLayout>
+  );
+};
+
+export default ImportServicesPage;
