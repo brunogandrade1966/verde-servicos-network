@@ -13,7 +13,8 @@ import {
   Briefcase,
   Users,
   FileText,
-  Settings
+  Settings,
+  Handshake
 } from 'lucide-react';
 
 const DashboardNavigation = () => {
@@ -55,6 +56,12 @@ const DashboardNavigation = () => {
       path: '/partnerships',
       icon: Briefcase,
       label: 'Parcerias',
+      show: profile?.user_type === 'professional'
+    },
+    {
+      path: '/my-partnership-requests',
+      icon: Handshake,
+      label: 'Solicitar Parcerias',
       show: profile?.user_type === 'professional'
     },
     {

@@ -20,6 +20,7 @@ import ManageServices from './pages/ManageServices';
 import Partnerships from './pages/Partnerships';
 import CreatePartnership from './pages/CreatePartnership';
 import CreatePartnershipForm from './pages/CreatePartnershipForm';
+import MyPartnershipRequests from './pages/MyPartnershipRequests';
 import Services from './pages/Services';
 import MyProjects from './pages/MyProjects';
 import MyDemands from './pages/MyDemands';
@@ -191,6 +192,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreatePartnershipForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-partnership-requests"
+                element={
+                  <ProtectedRoute>
+                    <MyPartnershipRequests />
                   </ProtectedRoute>
                 }
               />
