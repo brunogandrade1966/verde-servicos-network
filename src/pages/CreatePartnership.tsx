@@ -17,28 +17,49 @@ interface Service {
 }
 
 const CreatePartnership = () => {
-  const { profile } = useAuth();
+  const { profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { services, loading } = useServices();
+  const { services, loading: servicesLoading } = useServices();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
 
+  console.log('CreatePartnership - profile:', profile, 'authLoading:', authLoading);
+  console.log('CreatePartnership - services:', services, 'servicesLoading:', servicesLoading);
+
   useEffect(() => {
     if (services) {
+      console.log('Filtering services with searchTerm:', searchTerm);
       const filtered = services.filter(service =>
         service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      console.log('Filtered services:', filtered);
       setFilteredServices(filtered);
     }
   }, [services, searchTerm]);
 
   const handleServiceSelect = (serviceId: string) => {
+    console.log('Service selected:', serviceId);
     navigate(`/partnerships/create-form?serviceId=${serviceId}`);
   };
 
+  // Loading state
+  if (authLoading || servicesLoading) {
+    return (
+      <ClientLayout>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+  }
+
+  // Access restriction
   if (profile?.user_type !== 'professional') {
+    console.log('Access denied - user type:', profile?.user_type);
     return (
       <ClientLayout>
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -52,6 +73,8 @@ const CreatePartnership = () => {
       </ClientLayout>
     );
   }
+
+  console.log('Rendering main content');
 
   return (
     <ClientLayout>
@@ -90,10 +113,22 @@ const CreatePartnership = () => {
         </div>
 
         {/* Services Grid */}
-        {loading ? (
-          <div className="text-center py-8">
-            <p>Carregando serviços...</p>
-          </div>
+        {!services || services.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <h3 className="text-xl font-semibold mb-2">Nenhum serviço cadastrado</h3>
+              <p className="text-gray-600 mb-4">
+                Ainda não há serviços cadastrados no sistema.
+              </p>
+              <Button
+                onClick={() => navigate('/partnerships/create-form')}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Criar Parceria Personalizada
+              </Button>
+            </CardContent>
+          </Card>
         ) : filteredServices.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -124,7 +159,7 @@ const CreatePartnership = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4 line-clamp-3">
-                    {service.description}
+                    {service.description || 'Sem descrição disponível'}
                   </p>
                   <Button
                     onClick={() => handleServiceSelect(service.id)}
