@@ -12,6 +12,8 @@ const Dashboard = () => {
   const location = useLocation();
 
   console.log('Dashboard - loading:', loading, 'user:', user, 'profile:', profile);
+  console.log('Dashboard - current path:', location.pathname);
+  console.log('Dashboard - user_type:', profile?.user_type);
 
   if (loading) {
     return (
@@ -43,6 +45,8 @@ const Dashboard = () => {
     );
   }
 
+  console.log('Dashboard - About to render based on user_type:', profile.user_type, 'and path:', location.pathname);
+
   switch (profile.user_type) {
     case 'client':
       return (
@@ -53,12 +57,15 @@ const Dashboard = () => {
     case 'professional':
       return <ProfessionalDashboard />;
     case 'admin':
+      console.log('Dashboard - Admin user detected, path check:', location.pathname === '/dashboard');
       // Usar AdminDashboard apenas para a rota exata /dashboard
       // Para outras rotas admin (como /admin/*), elas usarão ClientLayout
       if (location.pathname === '/dashboard') {
+        console.log('Dashboard - Rendering AdminDashboard');
         return <AdminDashboard />;
       }
       // Para outras rotas, usar ClientLayout
+      console.log('Dashboard - Rendering ClientLayout for admin on non-dashboard route');
       return (
         <ClientLayout>
           <NewClientDashboard />

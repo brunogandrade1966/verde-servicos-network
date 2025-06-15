@@ -7,10 +7,16 @@ import ImportServices from '@/components/admin/ImportServices';
 const ImportServicesPage = () => {
   const { profile } = useAuth();
 
+  console.log('ImportServicesPage - profile:', profile);
+  console.log('ImportServicesPage - user_type:', profile?.user_type);
+
   // Verificar se o usuário é admin
   if (profile?.user_type !== 'admin') {
+    console.log('ImportServicesPage - Redirecting non-admin user to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
+
+  console.log('ImportServicesPage - Rendering import services page for admin');
 
   return (
     <ClientLayout>
