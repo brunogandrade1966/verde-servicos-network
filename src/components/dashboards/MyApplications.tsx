@@ -1,33 +1,9 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-
-interface ProjectApplicationData {
-  id: string;
-  status: string;
-  proposed_price?: number;
-  created_at: string;
-  type: 'project';
-  projects: {
-    title: string;
-    status: string;
-  };
-}
-
-interface PartnershipApplicationData {
-  id: string;
-  status: string;
-  proposed_price?: number;
-  created_at: string;
-  type: 'partnership';
-  partnership_demands: {
-    title: string;
-    status: string;
-  };
-}
-
-type ApplicationData = ProjectApplicationData | PartnershipApplicationData;
+import type { ApplicationData } from '@/types/dashboard';
 
 interface MyApplicationsProps {
   applications: ApplicationData[];
@@ -78,10 +54,13 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
   };
 
   const getTitle = (application: ApplicationData) => {
-    if (application.type === 'project') {
+    if (application.type === 'project' && application.projects) {
       return application.projects.title;
     }
-    return application.partnership_demands.title;
+    if (application.type === 'partnership' && application.partnership_demands) {
+      return application.partnership_demands.title;
+    }
+    return 'Título não disponível';
   };
 
   const handleViewDetails = (application: ApplicationData) => {
