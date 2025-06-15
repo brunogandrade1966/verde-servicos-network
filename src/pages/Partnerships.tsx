@@ -3,14 +3,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Users } from 'lucide-react';
-import PartnershipDemandCard from '@/components/partnerships/PartnershipDemandCard';
 import ClientLayout from '@/components/layout/ClientLayout';
+import PartnershipHeader from '@/components/partnerships/PartnershipHeader';
+import PartnershipFilters from '@/components/partnerships/PartnershipFilters';
+import PartnershipStats from '@/components/partnerships/PartnershipStats';
+import PartnershipList from '@/components/partnerships/PartnershipList';
 
 interface PartnershipDemand {
   id: string;
@@ -37,7 +34,6 @@ interface PartnershipDemand {
 const Partnerships = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [demands, setDemands] = useState<PartnershipDemand[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,142 +93,30 @@ const Partnerships = () => {
   return (
     <ClientLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Demandas de Parcerias
-            </h1>
-            <p className="text-gray-600">
-              Encontre oportunidades de parceria criadas por outros profissionais
-            </p>
-          </div>
-          
-          {profile?.user_type === 'professional' && (
-            <Button
-              onClick={() => navigate('/partnerships/create')}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Demanda
-            </Button>
-          )}
-        </div>
+        <PartnershipHeader userType={profile?.user_type} />
 
-        {/* Filtros */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Filtros de Busca
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Buscar</label>
-                <Input
-                  placeholder="Título, descrição..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Tipo de Colaboração</label>
-                <Select value={collaborationType} onValueChange={setCollaborationType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os tipos</SelectItem>
-                    <SelectItem value="complementary">Complementar</SelectItem>
-                    <SelectItem value="joint">Conjunta</SelectItem>
-                    <SelectItem value="subcontract">Subcontratação</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Categoria</label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as categorias</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <PartnershipFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          collaborationType={collaborationType}
+          setCollaborationType={setCollaborationType}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          categories={categories}
+        />
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl font-bold text-green-600">
-                {demands.length}
-              </CardTitle>
-              <p className="text-sm text-gray-600">Demandas Disponíveis</p>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl font-bold text-blue-600">
-                {filteredDemands.length}
-              </CardTitle>
-              <p className="text-sm text-gray-600">Resultados Filtrados</p>
-            </CardHeader>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl font-bold text-purple-600">
-                {categories.length}
-              </CardTitle>
-              <p className="text-sm text-gray-600">Categorias Disponíveis</p>
-            </CardHeader>
-          </Card>
-        </div>
+        <PartnershipStats
+          totalDemands={demands.length}
+          filteredCount={filteredDemands.length}
+          categoriesCount={categories.length}
+        />
 
-        {/* Lista de Demandas */}
-        {loading ? (
-          <div className="text-center py-8">
-            <p>Carregando demandas de parceria...</p>
-          </div>
-        ) : filteredDemands.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold mb-2">
-                {demands.length === 0 ? 'Nenhuma demanda disponível' : 'Nenhum resultado encontrado'}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {demands.length === 0 
-                  ? 'Ainda não há demandas de parceria criadas por outros profissionais.'
-                  : 'Tente ajustar os filtros para encontrar demandas relevantes.'}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredDemands.map((demand) => (
-              <PartnershipDemandCard
-                key={demand.id}
-                demand={demand}
-                showApplyButton={profile?.user_type === 'professional'}
-              />
-            ))}
-          </div>
-        )}
+        <PartnershipList
+          demands={demands}
+          filteredDemands={filteredDemands}
+          loading={loading}
+          userType={profile?.user_type}
+        />
       </div>
     </ClientLayout>
   );

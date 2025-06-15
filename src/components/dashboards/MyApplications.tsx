@@ -1,10 +1,9 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-interface ProjectApplication {
+interface ProjectApplicationData {
   id: string;
   status: string;
   proposed_price?: number;
@@ -16,7 +15,7 @@ interface ProjectApplication {
   };
 }
 
-interface PartnershipApplication {
+interface PartnershipApplicationData {
   id: string;
   status: string;
   proposed_price?: number;
@@ -28,10 +27,10 @@ interface PartnershipApplication {
   };
 }
 
-type Application = ProjectApplication | PartnershipApplication;
+type ApplicationData = ProjectApplicationData | PartnershipApplicationData;
 
 interface MyApplicationsProps {
-  applications: Application[];
+  applications: ApplicationData[];
   loading: boolean;
 }
 
@@ -78,14 +77,14 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
     });
   };
 
-  const getTitle = (application: Application) => {
+  const getTitle = (application: ApplicationData) => {
     if (application.type === 'project') {
       return application.projects.title;
     }
     return application.partnership_demands.title;
   };
 
-  const handleViewDetails = (application: Application) => {
+  const handleViewDetails = (application: ApplicationData) => {
     if (application.type === 'project') {
       navigate('/projects');
     } else {
