@@ -95,35 +95,35 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         <Sidebar className="border-r border-gray-200">
-          <SidebarHeader className="p-6 border-b border-gray-200">
+          <SidebarHeader className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                <Leaf className="h-6 w-6 text-white" />
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Leaf className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Ambiental</h2>
-                <p className="text-sm text-gray-500">Partners</p>
+                <h2 className="text-base font-bold text-gray-900">Ambiental</h2>
+                <p className="text-xs text-gray-500">Partners</p>
               </div>
             </div>
           </SidebarHeader>
           
-          <SidebarContent className="p-4">
-            <SidebarMenu className="space-y-2">
+          <SidebarContent className="p-3">
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.path)}
-                    className="w-full justify-start py-3 px-4 rounded-lg transition-colors hover:bg-green-50 data-[active=true]:bg-green-100 data-[active=true]:text-green-700"
+                    className="w-full justify-start px-3 py-2 rounded-md transition-colors hover:bg-green-50 data-[active=true]:bg-green-100 data-[active=true]:text-green-700"
                   >
                     <button
                       onClick={() => navigate(item.path)}
-                      className="flex items-center space-x-3 w-full text-left"
+                      className="flex items-start space-x-3 w-full text-left"
                     >
-                      <item.icon className="h-5 w-5" />
-                      <div>
-                        <div className="font-medium">{item.title}</div>
-                        <div className="text-xs text-gray-500">{item.description}</div>
+                      <item.icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium truncate">{item.title}</div>
+                        <div className="text-xs text-gray-500 truncate">{item.description}</div>
                       </div>
                     </button>
                   </SidebarMenuButton>
@@ -132,11 +132,11 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
             </SidebarMenu>
           </SidebarContent>
 
-          <SidebarFooter className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3 mb-4">
-              <Avatar className="h-10 w-10">
+          <SidebarFooter className="p-3 border-t border-gray-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <Avatar className="h-8 w-8">
                 <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-                <AvatarFallback className="bg-green-100 text-green-600">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-green-100 text-green-600 text-xs">{initials}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -151,7 +151,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
               variant="outline"
               size="sm"
               onClick={handleSignOut}
-              className="w-full justify-start"
+              className="w-full justify-start text-sm"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sair
@@ -160,12 +160,12 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
         </Sidebar>
 
         <SidebarInset className="flex-1">
-          <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <header className="bg-white border-b border-gray-200 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <SidebarTrigger className="lg:hidden" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
+                  <h1 className="text-xl font-bold text-gray-900">
                     {menuItems.find(item => isActive(item.path))?.title || 'Dashboard'}
                   </h1>
                   <p className="text-sm text-gray-500">
@@ -176,7 +176,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
             </div>
           </header>
           
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-4">
             {children}
           </main>
         </SidebarInset>
