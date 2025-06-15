@@ -26,7 +26,9 @@ import {
   LogOut,
   Leaf,
   PlusCircle,
-  Briefcase
+  Briefcase,
+  Settings,
+  Upload
 } from 'lucide-react';
 
 interface ClientLayoutProps {
@@ -88,6 +90,24 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
       description: "Configurações do perfil"
     }
   ];
+
+  // Adicionar itens de menu para admin
+  if (profile?.user_type === 'admin') {
+    menuItems.push(
+      {
+        title: "Gerenciar Serviços",
+        icon: Settings,
+        path: "/admin/services",
+        description: "Administrar serviços do sistema"
+      },
+      {
+        title: "Importar Serviços",
+        icon: Upload,
+        path: "/admin/import-services",
+        description: "Carregar serviços predefinidos"
+      }
+    );
+  }
 
   const isActive = (path: string) => location.pathname === path;
 
