@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,6 +58,11 @@ const Partnerships = () => {
         .eq('status', 'open')
         .order('created_at', { ascending: false });
 
+      // Filtrar apenas demandas criadas por outros profissionais (não pelo usuário atual)
+      if (profile?.id) {
+        query = query.neq('professional_id', profile.id);
+      }
+
       const { data, error } = await query;
 
       if (error) {
@@ -95,10 +99,10 @@ const Partnerships = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Parcerias Profissionais
+              Demandas de Parcerias
             </h1>
             <p className="text-gray-600">
-              Encontre profissionais para trabalhos colaborativos e forme parcerias estratégicas
+              Encontre oportunidades de parceria criadas por outros profissionais
             </p>
           </div>
           
@@ -174,7 +178,7 @@ const Partnerships = () => {
               <CardTitle className="text-2xl font-bold text-green-600">
                 {demands.length}
               </CardTitle>
-              <p className="text-sm text-gray-600">Demandas Ativas</p>
+              <p className="text-sm text-gray-600">Demandas Disponíveis</p>
             </CardHeader>
           </Card>
           
@@ -207,22 +211,13 @@ const Partnerships = () => {
             <CardContent className="p-8 text-center">
               <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2">
-                {demands.length === 0 ? 'Nenhuma demanda encontrada' : 'Nenhum resultado encontrado'}
+                {demands.length === 0 ? 'Nenhuma demanda disponível' : 'Nenhum resultado encontrado'}
               </h3>
               <p className="text-gray-600 mb-4">
                 {demands.length === 0 
-                  ? 'Seja o primeiro a criar uma demanda de parceria!'
+                  ? 'Ainda não há demandas de parceria criadas por outros profissionais.'
                   : 'Tente ajustar os filtros para encontrar demandas relevantes.'}
               </p>
-              {profile?.user_type === 'professional' && demands.length === 0 && (
-                <Button
-                  onClick={() => navigate('/partnerships/create')}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar Primeira Demanda
-                </Button>
-              )}
             </CardContent>
           </Card>
         ) : (
@@ -231,7 +226,7 @@ const Partnerships = () => {
               <PartnershipDemandCard
                 key={demand.id}
                 demand={demand}
-                showApplyButton={profile?.user_type === 'professional' && profile?.id !== demand.profiles.name}
+                showApplyButton={profile?.user_type === 'professional'}
               />
             ))}
           </div>
