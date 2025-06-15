@@ -19,6 +19,7 @@ import Messages from './pages/Messages';
 import ManageServices from './pages/ManageServices';
 import Partnerships from './pages/Partnerships';
 import Services from './pages/Services';
+import MyProjects from './pages/MyProjects';
 import { Toaster } from '@/components/ui/toaster';
 import ReviewProfessional from './pages/ReviewProfessional';
 
