@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -56,7 +55,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              {/* Client routes with layout */}
               <Route
                 path="/services"
                 element={
@@ -89,7 +87,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              {/* Existing routes */}
               <Route
                 path="/profile"
                 element={
@@ -159,6 +156,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ManageServices />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/import-services"
+                element={
+                  <ProtectedRoute>
+                    <ImportServicesPage />
                   </ProtectedRoute>
                 }
               />
