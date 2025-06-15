@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,6 +24,7 @@ import Services from './pages/Services';
 import MyProjects from './pages/MyProjects';
 import MyDemands from './pages/MyDemands';
 import Applications from './pages/Applications';
+import MyApplications from './pages/MyApplications';
 import ImportServicesPage from './pages/ImportServices';
 import { Toaster } from '@/components/ui/toaster';
 import ReviewProfessional from './pages/ReviewProfessional';
@@ -88,6 +88,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Applications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-applications"
+                element={
+                  <ProtectedRoute>
+                    <MyApplications />
                   </ProtectedRoute>
                 }
               />
