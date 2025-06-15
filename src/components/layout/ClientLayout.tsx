@@ -28,7 +28,9 @@ import {
   PlusCircle,
   Briefcase,
   Settings,
-  Upload
+  Upload,
+  UserPlus,
+  Handshake
 } from 'lucide-react';
 
 interface ClientLayoutProps {
@@ -61,28 +63,46 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
       return [
         ...baseItems,
         {
-          title: "Explorar Demandas",
-          icon: Search,
-          path: "/projects",
-          description: "Buscar projetos disponíveis"
-        },
-        {
-          title: "Parcerias",
+          title: "Meus Projetos",
           icon: Briefcase,
-          path: "/partnerships",
-          description: "Oportunidades de parceria"
-        },
-        {
-          title: "Projetos Contratados",
-          icon: FileText,
           path: "/contracted-projects",
           description: "Projetos em andamento e concluídos"
         },
         {
-          title: "Mensagens",
+          title: "Publicar Solicitação de Parceria",
+          icon: UserPlus,
+          path: "/partnerships/create",
+          description: "Criar nova solicitação de parceria"
+        },
+        {
+          title: "Minhas Solicitações de Parceria",
+          icon: FileText,
+          path: "/my-partnership-requests",
+          description: "Solicitações de parceria publicadas"
+        },
+        {
+          title: "Minhas Parcerias",
+          icon: Handshake,
+          path: "/my-partnerships",
+          description: "Parcerias ativas e concluídas"
+        },
+        {
+          title: "Demandas de Parcerias",
+          icon: Search,
+          path: "/partnerships",
+          description: "Buscar oportunidades de parceria"
+        },
+        {
+          title: "Demandas de Clientes",
+          icon: Users,
+          path: "/projects",
+          description: "Buscar projetos disponíveis"
+        },
+        {
+          title: "Minhas Candidaturas",
           icon: MessageSquare,
-          path: "/messages",
-          description: "Conversas com clientes"
+          path: "/my-applications",
+          description: "Candidaturas enviadas"
         },
         {
           title: "Meu Perfil",
