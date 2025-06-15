@@ -95,7 +95,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         <Sidebar className="border-r border-gray-200">
-          <SidebarHeader className="p-4 border-b border-gray-200">
+          <SidebarHeader className="p-6 border-b border-gray-200">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Leaf className="h-5 w-5 text-white" />
@@ -107,23 +107,23 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
             </div>
           </SidebarHeader>
           
-          <SidebarContent className="p-3">
-            <SidebarMenu className="space-y-1">
+          <SidebarContent className="p-4">
+            <SidebarMenu className="space-y-3">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.path)}
-                    className="w-full justify-start px-3 py-2 rounded-md transition-colors hover:bg-green-50 data-[active=true]:bg-green-100 data-[active=true]:text-green-700"
+                    className="w-full justify-start px-4 py-3 rounded-lg transition-colors hover:bg-green-50 data-[active=true]:bg-green-100 data-[active=true]:text-green-700 h-auto"
                   >
                     <button
                       onClick={() => navigate(item.path)}
-                      className="flex items-start space-x-3 w-full text-left"
+                      className="flex items-start space-x-4 w-full text-left"
                     >
-                      <item.icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
+                      <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1 space-y-1">
                         <div className="text-sm font-medium truncate">{item.title}</div>
-                        <div className="text-xs text-gray-500 truncate">{item.description}</div>
+                        <div className="text-xs text-gray-500 truncate leading-relaxed">{item.description}</div>
                       </div>
                     </button>
                   </SidebarMenuButton>
@@ -132,9 +132,9 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
             </SidebarMenu>
           </SidebarContent>
 
-          <SidebarFooter className="p-3 border-t border-gray-200">
-            <div className="flex items-center space-x-3 mb-3">
-              <Avatar className="h-8 w-8">
+          <SidebarFooter className="p-4 border-t border-gray-200">
+            <div className="flex items-center space-x-3 mb-4">
+              <Avatar className="h-9 w-9">
                 <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
                 <AvatarFallback className="bg-green-100 text-green-600 text-xs">{initials}</AvatarFallback>
               </Avatar>
