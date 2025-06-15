@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Users, MapPin, Calendar, DollarSign, Eye, Send } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Search, Users, MapPin, Calendar, DollarSign, Eye, Edit, Plus } from 'lucide-react';
 import ClientLayout from '@/components/layout/ClientLayout';
 
 interface PartnershipRequest {
@@ -32,6 +33,10 @@ interface PartnershipRequest {
     name: string;
     avatar_url?: string;
   };
+  partnership_applications: Array<{
+    id: string;
+    status: string;
+  }>;
 }
 
 const MyPartnershipRequests = () => {
@@ -41,32 +46,32 @@ const MyPartnershipRequests = () => {
   const [requests, setRequests] = useState<PartnershipRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [collaborationType, setCollaborationType] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
 
   useEffect(() => {
     if (profile?.user_type === 'professional') {
-      fetchPartnershipRequests();
+      fetchMyPartnershipRequests();
     }
   }, [profile]);
 
-  const fetchPartnershipRequests = async () => {
+  const fetchMyPartnershipRequests = async () => {
     try {
-      // Buscar demandas de parceria criadas por outros profissionais (não pelo usuário atual)
+      // Buscar demandas de parceria criadas pelo usuário atual
       const { data, error } = await supabase
         .from('partnership_demands')
         .select(`
           *,
           services(name, category),
-          profiles(name, avatar_url)
+          profiles(name, avatar_url),
+          partnership_applications(id, status)
         `)
-        .eq('status', 'open')
-        .neq('professional_id', profile?.id)
+        .eq('professional_id', profile?.id)
         .order('created_at', { ascending: false });
 
       if (error) {
         toast({
-          title: "Erro ao carregar solicitações",
+          title: "Erro ao carregar suas solicitações",
           description: error.message,
           variant: "destructive"
         });
@@ -74,10 +79,30 @@ const MyPartnershipRequests = () => {
         setRequests(data || []);
       }
     } catch (error) {
-      console.error('Error fetching partnership requests:', error);
+      console.error('Error fetching my partnership requests:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statuses = {
+      open: 'Aberta',
+      in_progress: 'Em Andamento',
+      completed: 'Concluída',
+      cancelled: 'Cancelada'
+    };
+    return statuses[status as keyof typeof statuses] || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors = {
+      open: 'bg-green-100 text-green-800',
+      in_progress: 'bg-blue-100 text-blue-800',
+      completed: 'bg-gray-100 text-gray-800',
+      cancelled: 'bg-red-100 text-red-800'
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
   const getCollaborationTypeLabel = (type: string) => {
@@ -89,41 +114,38 @@ const MyPartnershipRequests = () => {
     return types[type as keyof typeof types] || type;
   };
 
-  const getCollaborationTypeColor = (type: string) => {
-    const colors = {
-      complementary: 'bg-blue-100 text-blue-800',
-      joint: 'bg-green-100 text-green-800',
-      subcontract: 'bg-purple-100 text-purple-800'
-    };
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
   const formatBudget = (min?: number, max?: number) => {
-    if (!min && !max) return null;
+    if (!min && !max) return 'Não informado';
     if (min && max) return `R$ ${min.toLocaleString()} - R$ ${max.toLocaleString()}`;
     if (min) return `A partir de R$ ${min.toLocaleString()}`;
     if (max) return `Até R$ ${max.toLocaleString()}`;
-    return null;
+    return 'Não informado';
+  };
+
+  const getCandidatesCount = (applications: Array<{id: string, status: string}>) => {
+    return applications.filter(app => app.status === 'pending').length;
   };
 
   const handleViewDetails = (requestId: string) => {
     navigate(`/partnerships/${requestId}`);
   };
 
-  const handleApply = (requestId: string) => {
-    navigate(`/partnerships/${requestId}/apply`);
+  const handleViewCandidates = (requestId: string) => {
+    navigate(`/partnerships/${requestId}/candidates`);
+  };
+
+  const handleCreateNew = () => {
+    navigate('/partnerships/create');
   };
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
     const matchesType = collaborationType === 'all' || request.collaboration_type === collaborationType;
-    const matchesCategory = categoryFilter === 'all' || request.services.category === categoryFilter;
     
-    return matchesSearch && matchesType && matchesCategory;
+    return matchesSearch && matchesStatus && matchesType;
   });
-
-  const categories = [...new Set(requests.map(r => r.services.category))];
 
   if (profile?.user_type !== 'professional') {
     return (
@@ -132,7 +154,7 @@ const MyPartnershipRequests = () => {
           <Card>
             <CardContent className="p-6 text-center">
               <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-              <p className="text-gray-600">Apenas profissionais podem visualizar solicitações de parceria.</p>
+              <p className="text-gray-600">Apenas profissionais podem visualizar suas solicitações de parceria.</p>
             </CardContent>
           </Card>
         </div>
@@ -144,13 +166,19 @@ const MyPartnershipRequests = () => {
     <ClientLayout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Solicitações de Parceria
-          </h1>
-          <p className="text-gray-600">
-            Encontre oportunidades de parceria criadas por outros profissionais
-          </p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Minhas Solicitações de Parceria
+            </h1>
+            <p className="text-gray-600">
+              Gerencie suas solicitações de parceria criadas
+            </p>
+          </div>
+          <Button onClick={handleCreateNew} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Solicitação de Parceria
+          </Button>
         </div>
 
         {/* Filtros */}
@@ -173,6 +201,22 @@ const MyPartnershipRequests = () => {
               </div>
               
               <div>
+                <label className="block text-sm font-medium mb-2">Status</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="open">Aberta</SelectItem>
+                    <SelectItem value="in_progress">Em Andamento</SelectItem>
+                    <SelectItem value="completed">Concluída</SelectItem>
+                    <SelectItem value="cancelled">Cancelada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium mb-2">Tipo de Colaboração</label>
                 <Select value={collaborationType} onValueChange={setCollaborationType}>
                   <SelectTrigger>
@@ -186,32 +230,15 @@ const MyPartnershipRequests = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Categoria</label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as categorias</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-2xl font-bold text-green-600">
+              <CardTitle className="text-2xl font-bold text-blue-600">
                 {requests.length}
               </CardTitle>
               <p className="text-sm text-gray-600">Total de Solicitações</p>
@@ -220,111 +247,130 @@ const MyPartnershipRequests = () => {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-2xl font-bold text-blue-600">
-                {filteredRequests.length}
+              <CardTitle className="text-2xl font-bold text-green-600">
+                {requests.filter(r => r.status === 'open').length}
               </CardTitle>
-              <p className="text-sm text-gray-600">Resultados Filtrados</p>
+              <p className="text-sm text-gray-600">Solicitações Abertas</p>
+            </CardHeader>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-2xl font-bold text-orange-600">
+                {requests.reduce((acc, r) => acc + getCandidatesCount(r.partnership_applications), 0)}
+              </CardTitle>
+              <p className="text-sm text-gray-600">Candidatos Pendentes</p>
             </CardHeader>
           </Card>
         </div>
 
-        {/* Lista de Solicitações */}
+        {/* Tabela de Solicitações */}
         {loading ? (
           <div className="text-center py-8">
-            <p>Carregando solicitações...</p>
+            <p>Carregando suas solicitações...</p>
           </div>
         ) : filteredRequests.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2">
-                {requests.length === 0 ? 'Nenhuma solicitação encontrada' : 'Nenhum resultado encontrado'}
+                {requests.length === 0 ? 'Nenhuma solicitação criada' : 'Nenhum resultado encontrado'}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 {requests.length === 0 
-                  ? 'Não há solicitações de parceria disponíveis no momento.'
-                  : 'Tente ajustar os filtros para encontrar solicitações relevantes.'}
+                  ? 'Você ainda não criou nenhuma solicitação de parceria.'
+                  : 'Tente ajustar os filtros para encontrar suas solicitações.'}
               </p>
+              {requests.length === 0 && (
+                <Button onClick={handleCreateNew} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeira Solicitação
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredRequests.map((request) => (
-              <Card key={request.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">{request.title}</CardTitle>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <Badge variant="outline">{request.services.category}</Badge>
-                        <Badge className={getCollaborationTypeColor(request.collaboration_type)}>
-                          {getCollaborationTypeLabel(request.collaboration_type)}
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Serviço</TableHead>
+                    <TableHead>Parceiro</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Meu Papel</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRequests.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell>
+                        {new Date(request.created_at).toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{request.title}</div>
+                          <div className="text-sm text-gray-500 line-clamp-1">
+                            {request.description}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{request.services.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {getCollaborationTypeLabel(request.collaboration_type)}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-600">
+                          {request.status === 'open' ? 'Aguardando seleção' : 'Parceiro selecionado'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(request.status)}>
+                          {getStatusLabel(request.status)}
                         </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Users className="h-4 w-4" />
-                    <span>Por {request.profiles.name}</span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <p className="text-gray-700 mb-4 line-clamp-3">
-                    {request.description}
-                  </p>
-
-                  {request.required_skills && (
-                    <div className="mb-4">
-                      <h4 className="font-medium text-sm mb-2">Habilidades Requeridas:</h4>
-                      <p className="text-sm text-gray-600 line-clamp-2">{request.required_skills}</p>
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-                    {request.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        <span>{request.location}</span>
-                      </div>
-                    )}
-                    
-                    {request.deadline && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>Até {new Date(request.deadline).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                    )}
-                    
-                    {formatBudget(request.budget_min, request.budget_max) && (
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        <span>{formatBudget(request.budget_min, request.budget_max)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleViewDetails(request.id)} 
-                      className="flex-1"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver Detalhes
-                    </Button>
-                    <Button 
-                      onClick={() => handleApply(request.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                    >
-                      <Send className="h-4 w-4 mr-2" />
-                      Candidatar-se
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          Solicitante
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {getCandidatesCount(request.partnership_applications) > 0 && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewCandidates(request.id)}
+                              className="bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100"
+                            >
+                              <Users className="h-4 w-4 mr-1" />
+                              Ver Candidatos
+                            </Button>
+                          )}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewDetails(request.id)}
+                            className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Detalhes
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         )}
       </div>
     </ClientLayout>
