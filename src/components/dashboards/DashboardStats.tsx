@@ -1,19 +1,9 @@
 
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface Application {
-  id: string;
-  status: string;
-  proposed_price?: number;
-  created_at: string;
-  projects: {
-    title: string;
-    status: string;
-  };
-}
+import type { ApplicationData } from '@/types/dashboard';
 
 interface DashboardStatsProps {
-  applications: Application[];
+  applications: ApplicationData[];
   projectsCount: number;
   partnershipsCount?: number;
   partnershipApplicationsCount?: number;

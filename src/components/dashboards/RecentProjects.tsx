@@ -3,24 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  budget_min?: number;
-  budget_max?: number;
-  deadline?: string;
-  location?: string;
-  created_at: string;
-  services: {
-    name: string;
-  };
-  profiles: {
-    name: string;
-  };
-}
+import type { Project } from '@/types/dashboard';
 
 interface RecentProjectsProps {
   projects: Project[];
