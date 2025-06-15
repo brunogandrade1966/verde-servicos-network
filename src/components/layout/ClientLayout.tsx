@@ -46,69 +46,116 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
     await signOut();
   };
 
-  const menuItems = [
-    {
-      title: "Dashboard",
-      icon: Home,
-      path: "/dashboard",
-      description: "Visão geral e estatísticas"
-    },
-    {
-      title: "Solicitar Serviço",
-      icon: PlusCircle,
-      path: "/services",
-      description: "Buscar e solicitar serviços"
-    },
-    {
-      title: "Buscar Profissionais",
-      icon: Users,
-      path: "/professionals",
-      description: "Encontrar profissionais qualificados"
-    },
-    {
-      title: "Meus Projetos",
-      icon: Briefcase,
-      path: "/my-projects",
-      description: "Projetos em andamento e concluídos"
-    },
-    {
-      title: "Minhas Demandas",
-      icon: FileText,
-      path: "/my-demands",
-      description: "Demandas publicadas"
-    },
-    {
-      title: "Candidaturas Recebidas",
-      icon: MessageSquare,
-      path: "/applications",
-      description: "Gerenciar candidaturas"
-    },
-    {
-      title: "Meu Perfil",
-      icon: User,
-      path: "/profile",
-      description: "Configurações do perfil"
-    }
-  ];
-
-  // Adicionar itens de menu para admin
-  if (profile?.user_type === 'admin') {
-    menuItems.push(
+  // Menu items baseados no tipo de usuário
+  const getMenuItems = () => {
+    const baseItems = [
       {
-        title: "Gerenciar Serviços",
-        icon: Settings,
-        path: "/admin/services",
-        description: "Administrar serviços do sistema"
+        title: "Dashboard",
+        icon: Home,
+        path: "/dashboard",
+        description: "Visão geral e estatísticas"
+      }
+    ];
+
+    if (profile?.user_type === 'professional') {
+      return [
+        ...baseItems,
+        {
+          title: "Explorar Demandas",
+          icon: Search,
+          path: "/projects",
+          description: "Buscar projetos disponíveis"
+        },
+        {
+          title: "Parcerias",
+          icon: Briefcase,
+          path: "/partnerships",
+          description: "Oportunidades de parceria"
+        },
+        {
+          title: "Projetos Contratados",
+          icon: FileText,
+          path: "/contracted-projects",
+          description: "Projetos em andamento e concluídos"
+        },
+        {
+          title: "Mensagens",
+          icon: MessageSquare,
+          path: "/messages",
+          description: "Conversas com clientes"
+        },
+        {
+          title: "Meu Perfil",
+          icon: User,
+          path: "/profile",
+          description: "Configurações do perfil"
+        }
+      ];
+    }
+
+    // Menu para clientes
+    const clientItems = [
+      ...baseItems,
+      {
+        title: "Solicitar Serviço",
+        icon: PlusCircle,
+        path: "/services",
+        description: "Buscar e solicitar serviços"
       },
       {
-        title: "Importar Serviços",
-        icon: Upload,
-        path: "/admin/import-services",
-        description: "Carregar serviços predefinidos"
+        title: "Buscar Profissionais",
+        icon: Users,
+        path: "/professionals",
+        description: "Encontrar profissionais qualificados"
+      },
+      {
+        title: "Meus Projetos",
+        icon: Briefcase,
+        path: "/my-projects",
+        description: "Projetos em andamento e concluídos"
+      },
+      {
+        title: "Minhas Demandas",
+        icon: FileText,
+        path: "/my-demands",
+        description: "Demandas publicadas"
+      },
+      {
+        title: "Candidaturas Recebidas",
+        icon: MessageSquare,
+        path: "/applications",
+        description: "Gerenciar candidaturas"
+      },
+      {
+        title: "Meu Perfil",
+        icon: User,
+        path: "/profile",
+        description: "Configurações do perfil"
       }
-    );
-  }
+    ];
 
+    // Adicionar itens de menu para admin
+    if (profile?.user_type === 'admin') {
+      clientItems.push(
+        {
+          title: "Gerenciar Serviços",
+          icon: Settings,
+          path: "/admin/services",
+          description: "Administrar serviços do sistema"
+        },
+        {
+          title: "Importar Serviços",
+          icon: Upload,
+          path: "/admin/import-services",
+          description: "Carregar serviços predefinidos"
+        }
+      );
+    }
+
+    return clientItems;
+  };
+
+  const menuItems = getMenuItems();
   const isActive = (path: string) => location.pathname === path;
 
   return (

@@ -2,15 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import DashboardHeader from './DashboardHeader';
 import DashboardStats from './DashboardStats';
-import DashboardNavigation from './DashboardNavigation';
 import RecentProjects from './RecentProjects';
 import MyApplications from './MyApplications';
 import ActiveProjects from './ActiveProjects';
 import ActivePartnerships from './ActivePartnerships';
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface Project {
   id: string;
@@ -66,7 +64,7 @@ interface ActivePartnership {
 }
 
 const ProfessionalDashboard = () => {
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [activeProjects, setActiveProjects] = useState<ActiveProject[]>([]);
@@ -74,7 +72,6 @@ const ProfessionalDashboard = () => {
   const [partnershipsCount, setPartnershipsCount] = useState(0);
   const [partnershipApplicationsCount, setPartnershipApplicationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -199,20 +196,9 @@ const ProfessionalDashboard = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <DashboardHeader 
-        profileName={profile?.name} 
-        profileAvatar={profile?.avatar_url}
-        onSignOut={handleSignOut} 
-      />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ClientLayout>
+      <div className="space-y-8">
         <DashboardStats 
           applications={applications} 
           projectsCount={projects.length}
@@ -220,11 +206,9 @@ const ProfessionalDashboard = () => {
           partnershipApplicationsCount={partnershipApplicationsCount}
         />
 
-        <DashboardNavigation />
-
         {/* Active Projects and Partnerships Section */}
         {(activeProjects.length > 0 || activePartnerships.length > 0) && (
-          <div className="mb-8">
+          <div>
             <h2 className="text-xl font-bold text-gray-900 mb-6">Projetos e Parcerias em Andamento</h2>
             <div className="grid lg:grid-cols-2 gap-8">
               {activeProjects.length > 0 && (
@@ -255,8 +239,8 @@ const ProfessionalDashboard = () => {
             loading={loading} 
           />
         </div>
-      </main>
-    </div>
+      </div>
+    </ClientLayout>
   );
 };
 
