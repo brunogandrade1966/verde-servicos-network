@@ -51,6 +51,8 @@ const Dashboard = () => {
     case 'professional':
       return <ProfessionalDashboard />;
     case 'admin':
+      // Usar AdminDashboard apenas para a rota /dashboard
+      // Para outras rotas admin, elas usarão ClientLayout
       return <AdminDashboard />;
     default:
       return (
