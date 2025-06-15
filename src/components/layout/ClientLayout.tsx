@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -79,12 +78,6 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
           icon: FileText,
           path: "/my-partnership-requests",
           description: "Solicitações de parceria publicadas"
-        },
-        {
-          title: "Minhas Parcerias",
-          icon: Handshake,
-          path: "/my-partnerships",
-          description: "Parcerias ativas e concluídas"
         },
         {
           title: "Demandas de Parcerias",
