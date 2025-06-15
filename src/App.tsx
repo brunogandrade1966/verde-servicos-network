@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,6 +18,8 @@ import ContractedProjects from './pages/ContractedProjects';
 import Messages from './pages/Messages';
 import ManageServices from './pages/ManageServices';
 import Partnerships from './pages/Partnerships';
+import CreatePartnership from './pages/CreatePartnership';
+import CreatePartnershipForm from './pages/CreatePartnershipForm';
 import Services from './pages/Services';
 import MyProjects from './pages/MyProjects';
 import MyDemands from './pages/MyDemands';
@@ -172,6 +175,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Partnerships />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/partnerships/create"
+                element={
+                  <ProtectedRoute>
+                    <CreatePartnership />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/partnerships/create-form"
+                element={
+                  <ProtectedRoute>
+                    <CreatePartnershipForm />
                   </ProtectedRoute>
                 }
               />

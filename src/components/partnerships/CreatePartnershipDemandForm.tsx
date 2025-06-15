@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +29,11 @@ interface PartnershipDemandData {
   location?: string;
 }
 
-const CreatePartnershipDemandForm = () => {
+interface CreatePartnershipDemandFormProps {
+  preselectedServiceId?: string | null;
+}
+
+const CreatePartnershipDemandForm = ({ preselectedServiceId }: CreatePartnershipDemandFormProps) => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -41,7 +44,7 @@ const CreatePartnershipDemandForm = () => {
     defaultValues: {
       title: '',
       description: '',
-      service_id: '',
+      service_id: preselectedServiceId || '',
       required_skills: '',
       collaboration_type: '',
       budget_min: undefined,
@@ -54,6 +57,12 @@ const CreatePartnershipDemandForm = () => {
   useEffect(() => {
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    if (preselectedServiceId) {
+      form.setValue('service_id', preselectedServiceId);
+    }
+  }, [preselectedServiceId, form]);
 
   const fetchServices = async () => {
     try {
@@ -188,7 +197,7 @@ const CreatePartnershipDemandForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Categoria do Serviço</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a categoria" />
@@ -323,10 +332,10 @@ const CreatePartnershipDemandForm = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/partnerships')}
+                  onClick={() => navigate('/partnerships/create')}
                   className="flex-1"
                 >
-                  Cancelar
+                  Voltar
                 </Button>
                 <Button 
                   type="submit" 
