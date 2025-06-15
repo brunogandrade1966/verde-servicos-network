@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Users } from 'lucide-react';
 import PartnershipDemandCard from '@/components/partnerships/PartnershipDemandCard';
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface PartnershipDemand {
   id: string;
@@ -93,10 +95,10 @@ const Partnerships = () => {
   const categories = [...new Set(demands.map(d => d.services.category))];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ClientLayout>
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Demandas de Parcerias
@@ -118,7 +120,7 @@ const Partnerships = () => {
         </div>
 
         {/* Filtros */}
-        <Card className="mb-8">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -172,7 +174,7 @@ const Partnerships = () => {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-2xl font-bold text-green-600">
@@ -232,7 +234,7 @@ const Partnerships = () => {
           </div>
         )}
       </div>
-    </div>
+    </ClientLayout>
   );
 };
 
