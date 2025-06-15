@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,14 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, MapPin, DollarSign, Users, Search, Filter, Plus } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Users, Search, Plus } from 'lucide-react';
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectStatus = Database['public']['Enums']['project_status'];
 
-interface MyProject {
+interface MyDemand {
   id: string;
   title: string;
   description: string;
@@ -35,20 +35,19 @@ interface MyProject {
   };
 }
 
-const MyProjects = () => {
+const MyDemands = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<MyProject[]>([]);
+  const [demands, setDemands] = useState<MyDemand[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
-    fetchMyProjects();
+    fetchMyDemands();
   }, [profile]);
 
-  const fetchMyProjects = async () => {
+  const fetchMyDemands = async () => {
     if (!profile?.id) return;
 
     try {
@@ -59,30 +58,30 @@ const MyProjects = () => {
           services(name, category)
         `)
         .eq('client_id', profile.id)
-        .in('status', ['in_progress', 'completed']) // Apenas projetos em andamento ou finalizados
+        .in('status', ['draft', 'open']) // Apenas demandas em aberto
         .order('updated_at', { ascending: false });
 
       const { data, error } = await query;
 
       if (error) {
         toast({
-          title: "Erro ao carregar projetos",
+          title: "Erro ao carregar demandas",
           description: error.message,
           variant: "destructive"
         });
         return;
       }
 
-      // Buscar contagem de aplicações para cada projeto
-      const projectsWithCounts = await Promise.all(
-        (data || []).map(async (project) => {
+      // Buscar contagem de aplicações para cada demanda
+      const demandsWithCounts = await Promise.all(
+        (data || []).map(async (demand) => {
           const { count } = await supabase
             .from('applications')
             .select('*', { count: 'exact', head: true })
-            .eq('project_id', project.id);
+            .eq('project_id', demand.id);
 
           return {
-            ...project,
+            ...demand,
             _count: {
               applications: count || 0
             }
@@ -90,20 +89,18 @@ const MyProjects = () => {
         })
       );
 
-      setProjects(projectsWithCounts);
+      setDemands(demandsWithCounts);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      console.error('Error fetching demands:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+  const filteredDemands = demands.filter(demand => {
+    const matchesSearch = demand.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         demand.description.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
   });
 
   const formatBudget = (min?: number, max?: number) => {
@@ -116,9 +113,9 @@ const MyProjects = () => {
 
   const getStatusStats = () => {
     const stats = {
-      total: projects.length,
-      in_progress: projects.filter(p => p.status === 'in_progress').length,
-      completed: projects.filter(p => p.status === 'completed').length,
+      total: demands.length,
+      draft: demands.filter(d => d.status === 'draft').length,
+      open: demands.filter(d => d.status === 'open').length,
     };
     return stats;
   };
@@ -139,8 +136,14 @@ const MyProjects = () => {
     <ClientLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Meus Projetos</h1>
-          <p className="text-gray-600">Projetos em andamento e finalizados</p>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Minhas Demandas</h1>
+            <p className="text-gray-600">Demandas em rascunho e abertas para candidaturas</p>
+          </div>
+          <Button onClick={() => navigate('/services')} className="bg-green-600 hover:bg-green-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Demanda
+          </Button>
         </div>
 
         {/* Header com estatísticas */}
@@ -148,123 +151,133 @@ const MyProjects = () => {
           <Card>
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-              <div className="text-sm text-gray-500">Total de Projetos</div>
+              <div className="text-sm text-gray-500">Total de Demandas</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-orange-600">{stats.in_progress}</div>
-              <div className="text-sm text-gray-500">Em Andamento</div>
+              <div className="text-2xl font-bold text-gray-600">{stats.draft}</div>
+              <div className="text-sm text-gray-500">Rascunhos</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-              <div className="text-sm text-gray-500">Concluídos</div>
+              <div className="text-2xl font-bold text-blue-600">{stats.open}</div>
+              <div className="text-sm text-gray-500">Abertas</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filtros e busca */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex flex-1 gap-4 w-full sm:w-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Buscar projetos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os status</SelectItem>
-                <SelectItem value="in_progress">Em Andamento</SelectItem>
-                <SelectItem value="completed">Concluídos</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Busca */}
+        <div className="flex gap-4 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Buscar demandas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
 
-        {/* Lista de projetos */}
-        {filteredProjects.length === 0 ? (
+        {/* Lista de demandas */}
+        {filteredDemands.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <div className="text-gray-400 mb-4">
                 <Calendar className="h-16 w-16 mx-auto" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {projects.length === 0 ? 'Nenhum projeto em andamento ou finalizado' : 'Nenhum projeto encontrado'}
+                {demands.length === 0 ? 'Nenhuma demanda criada ainda' : 'Nenhuma demanda encontrada'}
               </h3>
               <p className="text-gray-500 mb-4">
-                {projects.length === 0 
-                  ? 'Seus projetos aparecerão aqui quando forem aceitos por profissionais'
-                  : 'Tente ajustar os filtros para encontrar seus projetos'
+                {demands.length === 0 
+                  ? 'Comece criando sua primeira demanda de serviço ambiental'
+                  : 'Tente ajustar a busca para encontrar suas demandas'
                 }
               </p>
+              {demands.length === 0 && (
+                <Button onClick={() => navigate('/services')} className="bg-green-600 hover:bg-green-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeira Demanda
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+            {filteredDemands.map((demand) => (
+              <Card key={demand.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
                     <CardTitle className="text-lg line-clamp-2">
-                      {project.title}
+                      {demand.title}
                     </CardTitle>
-                    <ProjectStatusBadge status={project.status} />
+                    <ProjectStatusBadge status={demand.status} />
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Badge variant="outline">{project.services.category}</Badge>
+                    <Badge variant="outline">{demand.services.category}</Badge>
                     <span>•</span>
-                    <span>{project.services.name}</span>
+                    <span>{demand.services.name}</span>
                   </div>
                 </CardHeader>
                 
                 <CardContent>
                   <p className="text-gray-700 mb-4 line-clamp-3">
-                    {project.description}
+                    {demand.description}
                   </p>
 
                   <div className="space-y-2 text-sm text-gray-600 mb-4">
-                    {project.location && (
+                    {demand.location && (
                       <div className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
-                        <span>{project.location}</span>
+                        <span>{demand.location}</span>
                       </div>
                     )}
                     
-                    {project.deadline && (
+                    {demand.deadline && (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>Até {new Date(project.deadline).toLocaleDateString('pt-BR')}</span>
+                        <span>Até {new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
                       </div>
                     )}
                     
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
-                      <span>{formatBudget(project.budget_min, project.budget_max)}</span>
+                      <span>{formatBudget(demand.budget_min, demand.budget_max)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>{demand._count?.applications || 0} candidatura(s)</span>
                     </div>
                   </div>
 
                   <div className="text-xs text-gray-500 mb-4">
-                    <p>Atualizado em: {new Date(project.updated_at).toLocaleDateString('pt-BR')}</p>
+                    <p>Criado em: {new Date(demand.created_at).toLocaleDateString('pt-BR')}</p>
+                    <p>Atualizado em: {new Date(demand.updated_at).toLocaleDateString('pt-BR')}</p>
                   </div>
 
-                  <Button 
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                  >
-                    Ver Detalhes
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => navigate(`/projects/${demand.id}`)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      Ver Detalhes
+                    </Button>
+                    {demand._count && demand._count.applications > 0 && (
+                      <Button 
+                        onClick={() => navigate(`/applications?project=${demand.id}`)}
+                        size="sm"
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                      >
+                        Ver Candidaturas
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -275,4 +288,4 @@ const MyProjects = () => {
   );
 };
 
-export default MyProjects;
+export default MyDemands;
