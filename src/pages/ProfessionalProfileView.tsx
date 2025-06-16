@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +19,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useConversations } from '@/hooks/useConversations';
 import ClientLayout from '@/components/layout/ClientLayout';
 
 interface ProfessionalProfile {
@@ -56,9 +56,12 @@ const ProfessionalProfileView = () => {
   const { professionalId } = useParams<{ professionalId: string }>();
   const { toast } = useToast();
   const { profile: currentUser } = useAuth();
+  const navigate = useNavigate();
+  const { createConversation } = useConversations(currentUser?.id);
   const [professional, setProfessional] = useState<ProfessionalProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [startingConversation, setStartingConversation] = useState(false);
 
   useEffect(() => {
     fetchProfessionalProfile();
@@ -121,10 +124,36 @@ const ProfessionalProfileView = () => {
   const handleStartConversation = async () => {
     if (!currentUser || !professional) return;
 
-    toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "O sistema de mensagens será implementado em breve.",
-    });
+    if (currentUser.user_type !== 'client') {
+      toast({
+        title: "Acesso restrito",
+        description: "Apenas clientes podem iniciar conversas com profissionais.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setStartingConversation(true);
+    try {
+      const conversation = await createConversation(currentUser.id, professional.id);
+      
+      if (conversation) {
+        toast({
+          title: "Conversa iniciada!",
+          description: "Redirecionando para a página de mensagens..."
+        });
+        navigate('/messages');
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast({
+        title: "Erro ao iniciar conversa",
+        description: "Não foi possível iniciar a conversa. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setStartingConversation(false);
+    }
   };
   
   if (loading) {
@@ -197,9 +226,13 @@ const ProfessionalProfileView = () => {
                       
                       <div className="flex space-x-3 mt-4 md:mt-0">
                         {currentUser?.user_type === 'client' && (
-                          <Button onClick={handleStartConversation}>
+                          <Button 
+                            onClick={handleStartConversation}
+                            disabled={startingConversation}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
                             <MessageCircle className="h-4 w-4 mr-2" />
-                            Enviar Mensagem
+                            {startingConversation ? 'Iniciando...' : 'Enviar Mensagem'}
                           </Button>
                         )}
                       </div>
