@@ -128,13 +128,14 @@ export const useProfessionalDashboard = () => {
         .eq('professional_id', profile?.id)
         .order('created_at', { ascending: false });
 
-      // Combine applications with type information
+      // Combine applications with type information and preserve IDs
       const allApplications: ApplicationData[] = [];
 
       if (projectApplicationsData) {
         const projectApps = projectApplicationsData.map((app: ProjectApplication) => ({
           ...app,
-          type: 'project' as const
+          type: 'project' as const,
+          project_id: app.project_id
         }));
         allApplications.push(...projectApps);
       }
@@ -142,7 +143,8 @@ export const useProfessionalDashboard = () => {
       if (partnershipApplicationsData) {
         const partnershipApps = partnershipApplicationsData.map((app: PartnershipApplication) => ({
           ...app,
-          type: 'partnership' as const
+          type: 'partnership' as const,
+          partnership_demand_id: app.partnership_demand_id
         }));
         allApplications.push(...partnershipApps);
       }

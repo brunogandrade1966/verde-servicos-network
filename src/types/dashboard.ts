@@ -22,6 +22,7 @@ export interface ProjectApplication {
   status: string;
   proposed_price?: number;
   created_at: string;
+  project_id: string;
   projects: {
     title: string;
     status: string;
@@ -33,6 +34,7 @@ export interface PartnershipApplication {
   status: string;
   proposed_price?: number;
   created_at: string;
+  partnership_demand_id: string;
   partnership_demands: {
     title: string;
     status: string;
@@ -45,6 +47,8 @@ export interface ApplicationData {
   proposed_price?: number;
   created_at: string;
   type: 'project' | 'partnership';
+  project_id?: string;
+  partnership_demand_id?: string;
   projects?: {
     title: string;
     status: string;

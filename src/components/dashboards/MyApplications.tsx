@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,9 +64,9 @@ const MyApplications = ({ applications, loading }: MyApplicationsProps) => {
   };
 
   const handleViewDetails = (application: ApplicationData) => {
-    if (application.type === 'project') {
+    if (application.type === 'project' && application.project_id) {
       navigate(`/projects/${application.project_id}`);
-    } else if (application.type === 'partnership') {
+    } else if (application.type === 'partnership' && application.partnership_demand_id) {
       navigate(`/partnerships/${application.partnership_demand_id}`);
     }
   };
