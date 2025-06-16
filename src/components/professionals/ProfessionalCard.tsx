@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,13 +38,24 @@ const ProfessionalCard = ({ professional }: ProfessionalCardProps) => {
     console.log('Hiring professional:', professional.id);
   };
 
+  // Generate initials for fallback
+  const initials = professional.name
+    ?.split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'PR';
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
         <div className="flex items-start space-x-4">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-            <User className="h-8 w-8 text-green-600" />
-          </div>
+          <Avatar className="w-16 h-16">
+            <AvatarImage src={professional.avatar_url} alt={professional.name} />
+            <AvatarFallback className="bg-green-100 text-green-600">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
           <div className="flex-1">
             <CardTitle className="text-lg mb-1">{professional.name}</CardTitle>
             <div className="flex items-center space-x-2 mb-2">
