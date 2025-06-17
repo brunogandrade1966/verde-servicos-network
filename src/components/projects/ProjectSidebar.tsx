@@ -25,9 +25,10 @@ interface Profile {
 interface ProjectSidebarProps {
   project: Project;
   profile: Profile | null;
+  canApply?: boolean;
 }
 
-const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
+const ProjectSidebar = ({ project, profile, canApply = false }: ProjectSidebarProps) => {
   const navigate = useNavigate();
 
   const handleEditProject = () => {
@@ -48,7 +49,6 @@ const ProjectSidebar = ({ project, profile }: ProjectSidebarProps) => {
 
   const isOwner = profile?.id === project.client_id;
   const canEdit = profile?.user_type === 'client' && isOwner;
-  const canApply = profile?.user_type === 'professional' && project.status === 'open';
 
   return (
     <div className="space-y-6">
