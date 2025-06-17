@@ -6,9 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Award, MapPin, Save, Plus, X, Phone, Link, GraduationCap, Building, FileText } from 'lucide-react';
+import { User, Award, MapPin, Save, Plus, X, Phone, Link, GraduationCap, Building, FileText, Briefcase } from 'lucide-react';
 import AvatarUpload from './AvatarUpload';
 import CepSearchField from './CepSearchField';
+import ServicesSelector from './ServicesSelector';
 
 interface ProfessionalProfileData {
   name: string;
@@ -364,6 +365,27 @@ const ProfessionalProfileForm = ({ profile, userId, onSave, loading }: Professio
               required
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Serviços Oferecidos */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Briefcase className="h-5 w-5" />
+            <span>Serviços Oferecidos</span>
+          </CardTitle>
+          <CardDescription>
+            Selecione os serviços que você está habilitado a oferecer
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ServicesSelector
+            professionalId={userId}
+            onServicesChange={() => {
+              // Callback para quando os serviços mudarem, se necessário
+            }}
+          />
         </CardContent>
       </Card>
 
