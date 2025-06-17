@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, MapPin, Calendar, DollarSign, Users, Mail, Phone } from 'lucide-react';
 import StartPartnershipConversation from '@/components/partnerships/StartPartnershipConversation';
+import PartnershipStatusUpdater from '@/components/partnerships/PartnershipStatusUpdater';
+import ServiceCompletionConfirmation from '@/components/reviews/ServiceCompletionConfirmation';
+import MutualReviewSystem from '@/components/reviews/MutualReviewSystem';
 
 interface PartnershipDemand {
   id: string;

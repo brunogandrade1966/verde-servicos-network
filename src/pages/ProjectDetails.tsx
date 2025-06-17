@@ -8,6 +8,9 @@ import ProjectDetailsHeader from '@/components/projects/ProjectDetailsHeader';
 import ProjectInfo from '@/components/projects/ProjectInfo';
 import ProjectSidebar from '@/components/projects/ProjectSidebar';
 import ProjectTimeline from '@/components/projects/ProjectTimeline';
+import ProjectStatusUpdater from '@/components/projects/ProjectStatusUpdater';
+import ServiceCompletionConfirmation from '@/components/reviews/ServiceCompletionConfirmation';
+import MutualReviewSystem from '@/components/reviews/MutualReviewSystem';
 import ClientLayout from '@/components/layout/ClientLayout';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -178,6 +181,10 @@ const ProjectDetails = () => {
                    !hasApplied && 
                    !isOwner;
 
+  // Find accepted application to get professional info
+  const acceptedApplication = applications.find(app => app.status === 'accepted');
+  const assignedProfessional = acceptedApplication?.profiles;
+
   // Create timeline events from project data
   const timelineEvents = [
     {
@@ -206,6 +213,40 @@ const ProjectDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
           <div className="lg:col-span-2 space-y-6">
             <ProjectInfo project={project} />
+            
+            {/* Project Status Updater */}
+            {(isOwner || (assignedProfessional && profile?.id === assignedProfessional.id)) && (
+              <ProjectStatusUpdater
+                projectId={project.id}
+                currentStatus={project.status}
+                userType={profile?.user_type || 'client'}
+                isOwner={isOwner}
+                onStatusUpdate={handleApplicationUpdate}
+              />
+            )}
+
+            {/* Service Completion Confirmation */}
+            {project.status === 'completed' && isOwner && assignedProfessional && (
+              <ServiceCompletionConfirmation
+                projectId={project.id}
+                providerId={assignedProfessional.id}
+                providerName={assignedProfessional.name}
+                clientId={project.client_id}
+                status={project.status}
+                onConfirmation={handleApplicationUpdate}
+              />
+            )}
+
+            {/* Mutual Review System */}
+            {project.status === 'completed' && assignedProfessional && (
+              <MutualReviewSystem
+                projectId={project.id}
+                professionalId={assignedProfessional.id}
+                professionalName={assignedProfessional.name}
+                clientId={project.client_id}
+                status={project.status}
+              />
+            )}
             
             {isOwner && applications && (
               <div className="bg-white rounded-lg border p-6">
