@@ -56,7 +56,8 @@ const Partnerships = () => {
         .eq('status', 'open')
         .order('created_at', { ascending: false });
 
-      // Filtrar apenas demandas criadas por outros profissionais (não pelo usuário atual)
+      // Only show demands from professionals who have the required service in their professional_services
+      // and exclude demands created by the current user
       if (profile?.id) {
         query = query.neq('professional_id', profile.id);
       }
@@ -70,7 +71,24 @@ const Partnerships = () => {
           variant: "destructive"
         });
       } else {
-        setDemands(data || []);
+        // Additional filtering to ensure the demand creator actually offers the service
+        const validDemands = [];
+        
+        for (const demand of data || []) {
+          // Check if the professional who created this demand actually offers this service
+          const { data: professionalServices } = await supabase
+            .from('professional_services')
+            .select('service_id')
+            .eq('professional_id', demand.professional_id)
+            .eq('service_id', demand.service_id);
+          
+          // Only include demands where the professional actually offers the service
+          if (professionalServices && professionalServices.length > 0) {
+            validDemands.push(demand);
+          }
+        }
+        
+        setDemands(validDemands);
       }
     } catch (error) {
       console.error('Error fetching partnership demands:', error);

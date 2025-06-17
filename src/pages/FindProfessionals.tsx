@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +19,7 @@ interface Professional {
     price_range?: string;
     experience_years?: number;
     services: {
+      id: string;
       name: string;
       category: string;
     };
@@ -80,7 +82,7 @@ const FindProfessionals = () => {
             id,
             price_range,
             experience_years,
-            services(name, category)
+            services(id, name, category)
           )
         `)
         .eq('user_type', 'professional')
@@ -95,7 +97,12 @@ const FindProfessionals = () => {
         return;
       }
 
-      setProfessionals(data || []);
+      // Only include professionals who have at least one service selected
+      const professionalsWithServices = (data || []).filter(
+        professional => professional.professional_services && professional.professional_services.length > 0
+      );
+
+      setProfessionals(professionalsWithServices);
     } catch (error) {
       console.error('Error fetching professionals:', error);
     } finally {
@@ -104,17 +111,22 @@ const FindProfessionals = () => {
   };
 
   const filteredProfessionals = professionals.filter(professional => {
+    // Filter by search query
     const matchesSearch = professional.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          professional.bio?.toLowerCase().includes(searchQuery.toLowerCase());
     
+    // Filter by specific service (by service ID)
     const matchesService = !selectedService || 
-                          professional.professional_services.some(ps => ps.services.name === selectedService);
+                          professional.professional_services.some(ps => ps.services.id === selectedService);
     
+    // Filter by category
     const matchesCategory = !selectedCategory ||
                            professional.professional_services.some(ps => ps.services.category === selectedCategory);
 
+    // Filter by city
     const matchesCity = !selectedCity || professional.city === selectedCity;
     
+    // Filter by state
     const matchesState = !selectedState || professional.state === selectedState;
 
     return matchesSearch && matchesService && matchesCategory && matchesCity && matchesState;

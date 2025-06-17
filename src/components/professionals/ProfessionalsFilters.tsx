@@ -59,6 +59,11 @@ const ProfessionalsFilters = ({
     onStateChange(value === "all" ? "" : value);
   };
 
+  // Filter services based on selected category
+  const filteredServices = selectedCategory 
+    ? services.filter(service => service.category === selectedCategory)
+    : services;
+
   return (
     <Card className="mb-8">
       <CardHeader>
@@ -99,8 +104,8 @@ const ProfessionalsFilters = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os serviços</SelectItem>
-              {services.map((service) => (
-                <SelectItem key={service.id} value={service.name}>
+              {filteredServices.map((service) => (
+                <SelectItem key={service.id} value={service.id}>
                   {service.name}
                 </SelectItem>
               ))}
