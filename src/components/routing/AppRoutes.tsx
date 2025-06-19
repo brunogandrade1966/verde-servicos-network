@@ -19,6 +19,7 @@ import Partnerships from '../../pages/Partnerships';
 import CreatePartnership from '../../pages/CreatePartnership';
 import CreatePartnershipForm from '../../pages/CreatePartnershipForm';
 import MyPartnershipRequests from '../../pages/MyPartnershipRequests';
+import PartnershipDetails from '../../pages/PartnershipDetails';
 import Services from '../../pages/Services';
 import MyProjects from '../../pages/MyProjects';
 import MyDemands from '../../pages/MyDemands';
@@ -178,6 +179,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Partnerships />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/partnerships/:id"
+        element={
+          <ProtectedRoute>
+            <PartnershipDetails />
           </ProtectedRoute>
         }
       />
