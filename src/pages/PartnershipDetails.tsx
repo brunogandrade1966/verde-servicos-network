@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, MapPin, Calendar, DollarSign, Users, Mail, Phone } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ArrowLeft, MapPin, Calendar, DollarSign, Users, Mail, Phone, Edit, Eye } from 'lucide-react';
 import StartPartnershipConversation from '@/components/partnerships/StartPartnershipConversation';
 import PartnershipStatusUpdater from '@/components/partnerships/PartnershipStatusUpdater';
 import ServiceCompletionConfirmation from '@/components/reviews/ServiceCompletionConfirmation';
@@ -65,6 +65,7 @@ const PartnershipDetails = () => {
   const [demand, setDemand] = useState<PartnershipDemand | null>(null);
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [showApplicationsDialog, setShowApplicationsDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -154,6 +155,14 @@ const PartnershipDetails = () => {
 
   const handleApply = () => {
     navigate(`/partnerships/${id}/apply`);
+  };
+
+  const handleEditDemand = () => {
+    navigate(`/partnerships/${id}/edit`);
+  };
+
+  const handleViewApplications = () => {
+    setShowApplicationsDialog(true);
   };
 
   const isOwnDemand = profile?.id === demand?.professional_id;
@@ -432,16 +441,117 @@ const PartnershipDetails = () => {
               </Card>
             )}
 
-            {profile?.id === demand.professional_id && (
+            {isOwnDemand && (
               <Card>
                 <CardHeader>
                   <CardTitle>Suas Ações</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full">
-                    Ver Candidaturas
-                  </Button>
-                  <Button variant="outline" className="w-full">
+                  <Dialog open={showApplicationsDialog} onOpenChange={setShowApplicationsDialog}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={handleViewApplications}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Candidaturas ({applications.length})
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Candidaturas para a Demanda</DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        {applications.length === 0 ? (
+                          <p className="text-gray-500 text-center py-8">
+                            Nenhuma candidatura recebida ainda.
+                          </p>
+                        ) : (
+                          <div className="space-y-4">
+                            {applications.map((application) => (
+                              <div key={application.id} className="border rounded-lg p-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-3 mb-2">
+                                      <Avatar className="h-10 w-10">
+                                        <AvatarImage 
+                                          src={application.professional?.avatar_url} 
+                                          alt={application.professional?.name} 
+                                        />
+                                        <AvatarFallback>
+                                          {application.professional?.name?.charAt(0)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <h4 className="font-medium">{application.professional?.name}</h4>
+                                        <p className="text-sm text-gray-500">
+                                          {application.professional?.area_of_expertise}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <p className="text-gray-700 mb-3">{application.proposal}</p>
+                                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                      <span>Valor: R$ {application.proposed_price?.toLocaleString('pt-BR')}</span>
+                                      {application.estimated_duration && (
+                                        <span>Duração: {application.estimated_duration}</span>
+                                      )}
+                                      <span>
+                                        {new Date(application.created_at).toLocaleDateString('pt-BR')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col space-y-2">
+                                    <Badge 
+                                      variant={
+                                        application.status === 'accepted' ? 'default' :
+                                        application.status === 'rejected' ? 'destructive' : 'secondary'
+                                      }
+                                    >
+                                      {application.status === 'pending' && 'Pendente'}
+                                      {application.status === 'accepted' && 'Aceita'}
+                                      {application.status === 'rejected' && 'Rejeitada'}
+                                    </Badge>
+                                    {application.status === 'pending' && (
+                                      <div className="flex flex-col space-y-2">
+                                        <Button 
+                                          size="sm" 
+                                          className="bg-green-600 hover:bg-green-700"
+                                          onClick={() => {
+                                            updateApplicationStatus(application.id, 'accepted');
+                                            setShowApplicationsDialog(false);
+                                          }}
+                                        >
+                                          Aceitar
+                                        </Button>
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => {
+                                            updateApplicationStatus(application.id, 'rejected');
+                                            setShowApplicationsDialog(false);
+                                          }}
+                                        >
+                                          Rejeitar
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleEditDemand}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
                     Editar Demanda
                   </Button>
                 </CardContent>
