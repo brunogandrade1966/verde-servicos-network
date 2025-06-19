@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +13,7 @@ import StartPartnershipConversation from '@/components/partnerships/StartPartner
 import PartnershipStatusUpdater from '@/components/partnerships/PartnershipStatusUpdater';
 import ServiceCompletionConfirmation from '@/components/reviews/ServiceCompletionConfirmation';
 import MutualReviewSystem from '@/components/reviews/MutualReviewSystem';
+import ClientLayout from '@/components/layout/ClientLayout';
 
 interface PartnershipDemand {
   id: string;
@@ -181,23 +183,27 @@ const PartnershipDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <p>Carregando demanda...</p>
-      </div>
+      <ClientLayout>
+        <div className="flex items-center justify-center min-h-96">
+          <p>Carregando demanda...</p>
+        </div>
+      </ClientLayout>
     );
   }
 
   if (!demand) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <p>Demanda não encontrada</p>
-      </div>
+      <ClientLayout>
+        <div className="flex items-center justify-center min-h-96">
+          <p>Demanda não encontrada</p>
+        </div>
+      </ClientLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-purple-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <ClientLayout>
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button
@@ -211,60 +217,58 @@ const PartnershipDetails = () => {
           <h1 className="text-2xl font-bold">Detalhes da Demanda de Parceria</h1>
         </div>
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Conteúdo Principal */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline">{demand.services.category}</Badge>
-                    <Badge className={getCollaborationTypeColor(demand.collaboration_type)}>
-                      {getCollaborationTypeLabel(demand.collaboration_type)}
-                    </Badge>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Conteúdo Principal */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline">{demand.services.category}</Badge>
+                  <Badge className={getCollaborationTypeColor(demand.collaboration_type)}>
+                    {getCollaborationTypeLabel(demand.collaboration_type)}
+                  </Badge>
+                </div>
+                <CardTitle className="text-2xl">{demand.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-2">Descrição do Projeto</h3>
+                    <p className="text-gray-700 whitespace-pre-wrap">{demand.description}</p>
                   </div>
-                  <CardTitle className="text-2xl">{demand.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="font-semibold mb-2">Descrição do Projeto</h3>
-                      <p className="text-gray-700 whitespace-pre-wrap">{demand.description}</p>
-                    </div>
 
-                    {demand.required_skills && (
-                      <div>
-                        <h3 className="font-semibold mb-2">Habilidades/Especialidades Requeridas</h3>
-                        <p className="text-gray-700 whitespace-pre-wrap">{demand.required_skills}</p>
+                  {demand.required_skills && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Habilidades/Especialidades Requeridas</h3>
+                      <p className="text-gray-700 whitespace-pre-wrap">{demand.required_skills}</p>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {demand.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-gray-500" />
+                        <span>{demand.location}</span>
                       </div>
                     )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {demand.location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-gray-500" />
-                          <span>{demand.location}</span>
-                        </div>
-                      )}
-                      
-                      {demand.deadline && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-5 w-5 text-gray-500" />
-                          <span>Prazo: {new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      )}
-                      
-                      {formatBudget(demand.budget_min, demand.budget_max) && (
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-5 w-5 text-gray-500" />
-                          <span>{formatBudget(demand.budget_min, demand.budget_max)}</span>
-                        </div>
-                      )}
-                    </div>
+                    
+                    {demand.deadline && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-gray-500" />
+                        <span>Prazo: {new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    )}
+                    
+                    {formatBudget(demand.budget_min, demand.budget_max) && (
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-gray-500" />
+                        <span>{formatBudget(demand.budget_min, demand.budget_max)}</span>
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Applications */}
             <Card>
@@ -358,95 +362,95 @@ const PartnershipDetails = () => {
                 )}
               </CardContent>
             </Card>
+          </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Perfil do Profissional */}
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Perfil do Profissional */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Profissional
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 mb-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={demand.profiles.avatar_url} />
+                    <AvatarFallback>
+                      {demand.profiles.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-semibold">{demand.profiles.name}</h4>
+                    <p className="text-sm text-gray-600">
+                      Publicado em {new Date(demand.created_at).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                </div>
+
+                {demand.profiles.bio && (
+                  <p className="text-sm text-gray-600 mb-4">{demand.profiles.bio}</p>
+                )}
+
+                <div className="space-y-2">
+                  {demand.profiles.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      <span>{demand.profiles.email}</span>
+                    </div>
+                  )}
+                  
+                  {demand.profiles.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <span>{demand.profiles.phone}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ações */}
+            {canApply && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Profissional
-                  </CardTitle>
+                  <CardTitle>Candidatar-se</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-3 mb-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={demand.profiles.avatar_url} />
-                      <AvatarFallback>
-                        {demand.profiles.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h4 className="font-semibold">{demand.profiles.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        Publicado em {new Date(demand.created_at).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {demand.profiles.bio && (
-                    <p className="text-sm text-gray-600 mb-4">{demand.profiles.bio}</p>
-                  )}
-
-                  <div className="space-y-2">
-                    {demand.profiles.email && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="h-4 w-4 text-gray-500" />
-                        <span>{demand.profiles.email}</span>
-                      </div>
-                    )}
-                    
-                    {demand.profiles.phone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-gray-500" />
-                        <span>{demand.profiles.phone}</span>
-                      </div>
-                    )}
-                  </div>
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3"
+                    onClick={handleApply}
+                  >
+                    Enviar Candidatura
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Envie sua proposta para formar parceria neste projeto
+                  </p>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Ações */}
-              {canApply && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Candidatar-se</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3"
-                      onClick={handleApply}
-                    >
-                      Enviar Candidatura
-                    </Button>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Envie sua proposta para formar parceria neste projeto
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {profile?.id === demand.professional_id && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Suas Ações</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full">
-                      Ver Candidaturas
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                      Editar Demanda
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            {profile?.id === demand.professional_id && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Suas Ações</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full">
+                    Ver Candidaturas
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    Editar Demanda
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
-        </main>
+        </div>
       </div>
-    </div>
+    </ClientLayout>
   );
 };
 
