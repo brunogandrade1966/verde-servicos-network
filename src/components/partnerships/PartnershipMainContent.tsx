@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, DollarSign } from 'lucide-react';
@@ -6,6 +5,7 @@ import PartnershipStatusUpdater from './PartnershipStatusUpdater';
 import ServiceCompletionConfirmation from '@/components/reviews/ServiceCompletionConfirmation';
 import MutualReviewSystem from '@/components/reviews/MutualReviewSystem';
 import PartnershipApplicationsList from './PartnershipApplicationsList';
+import PartnershipReadOnlyView from './PartnershipReadOnlyView';
 import type { Database } from '@/integrations/supabase/types';
 
 type ProjectStatus = Database['public']['Enums']['project_status'];
@@ -74,6 +74,11 @@ const PartnershipMainContent = ({
   onStatusUpdate,
   onUpdateApplicationStatus
 }: PartnershipMainContentProps) => {
+  // Se a parceria está finalizada e o usuário é o profissional criador, mostrar visão somente leitura
+  if (demand.status === 'completed' && isOwnDemand) {
+    return <PartnershipReadOnlyView demand={demand} />;
+  }
+
   const getCollaborationTypeLabel = (type: string) => {
     const types = {
       complementary: 'Complementar',
@@ -171,7 +176,7 @@ const PartnershipMainContent = ({
         />
       )}
 
-      {/* Service Completion Confirmation */}
+      {/* Service Completion Confirmation - apenas para o profissional contratante */}
       {demand.status === 'completed' && isOwnDemand && partnerProfessional && (
         <ServiceCompletionConfirmation
           partnershipDemandId={demand.id}
@@ -194,15 +199,17 @@ const PartnershipMainContent = ({
         />
       )}
 
-      {/* Applications */}
-      <PartnershipApplicationsList
-        applications={applications}
-        isOwnDemand={isOwnDemand}
-        demandId={demand.id}
-        demandProfessionalId={demand.professional_id}
-        profileId={profileId}
-        onUpdateApplicationStatus={onUpdateApplicationStatus}
-      />
+      {/* Applications - apenas se não estiver finalizada */}
+      {demand.status !== 'completed' && (
+        <PartnershipApplicationsList
+          applications={applications}
+          isOwnDemand={isOwnDemand}
+          demandId={demand.id}
+          demandProfessionalId={demand.professional_id}
+          profileId={profileId}
+          onUpdateApplicationStatus={onUpdateApplicationStatus}
+        />
+      )}
     </div>
   );
 };

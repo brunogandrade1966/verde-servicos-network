@@ -57,7 +57,6 @@ const PartnershipStatusUpdater = ({
           };
         case 'in_progress':
           return { 
-            completed: baseStatuses.completed,
             cancelled: baseStatuses.cancelled 
           };
         default:

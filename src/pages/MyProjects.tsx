@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +27,7 @@ interface MyProject {
   location?: string;
   created_at: string;
   updated_at: string;
+  type: 'project' | 'partnership';
   services: {
     name: string;
     category: string;
@@ -43,6 +45,7 @@ const MyProjects = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
 
   useEffect(() => {
     fetchMyProjects();
@@ -52,47 +55,86 @@ const MyProjects = () => {
     if (!profile?.id) return;
 
     try {
-      let query = supabase
+      // Buscar projetos
+      const { data: projectsData, error: projectsError } = await supabase
         .from('projects')
         .select(`
           *,
           services(name, category)
         `)
         .eq('client_id', profile.id)
-        .in('status', ['in_progress', 'completed']) // Apenas projetos em andamento ou finalizados
+        .in('status', ['in_progress', 'completed'])
         .order('updated_at', { ascending: false });
 
-      const { data, error } = await query;
-
-      if (error) {
-        toast({
-          title: "Erro ao carregar projetos",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
+      if (projectsError) {
+        console.error('Error fetching projects:', projectsError);
       }
 
-      // Buscar contagem de aplicações para cada projeto
-      const projectsWithCounts = await Promise.all(
-        (data || []).map(async (project) => {
+      // Buscar demandas de parceria
+      const { data: partnershipsData, error: partnershipsError } = await supabase
+        .from('partnership_demands')
+        .select(`
+          *,
+          services(name, category)
+        `)
+        .eq('professional_id', profile.id)
+        .eq('status', 'completed')
+        .order('updated_at', { ascending: false });
+
+      if (partnershipsError) {
+        console.error('Error fetching partnerships:', partnershipsError);
+      }
+
+      // Combinar e transformar os dados
+      const allProjects: MyProject[] = [];
+
+      // Adicionar projetos
+      if (projectsData) {
+        for (const project of projectsData) {
           const { count } = await supabase
             .from('applications')
             .select('*', { count: 'exact', head: true })
             .eq('project_id', project.id);
 
-          return {
+          allProjects.push({
             ...project,
+            type: 'project',
             _count: {
               applications: count || 0
             }
-          };
-        })
-      );
+          });
+        }
+      }
 
-      setProjects(projectsWithCounts);
+      // Adicionar parcerias
+      if (partnershipsData) {
+        for (const partnership of partnershipsData) {
+          const { count } = await supabase
+            .from('partnership_applications')
+            .select('*', { count: 'exact', head: true })
+            .eq('partnership_demand_id', partnership.id);
+
+          allProjects.push({
+            ...partnership,
+            type: 'partnership',
+            _count: {
+              applications: count || 0
+            }
+          });
+        }
+      }
+
+      // Ordenar por data de atualização
+      allProjects.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+      setProjects(allProjects);
     } catch (error) {
       console.error('Error fetching projects:', error);
+      toast({
+        title: "Erro ao carregar projetos",
+        description: "Ocorreu um erro ao carregar seus projetos",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -102,8 +144,9 @@ const MyProjects = () => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+    const matchesType = typeFilter === 'all' || project.type === typeFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesType;
   });
 
   const formatBudget = (min?: number, max?: number) => {
@@ -119,8 +162,18 @@ const MyProjects = () => {
       total: projects.length,
       in_progress: projects.filter(p => p.status === 'in_progress').length,
       completed: projects.filter(p => p.status === 'completed').length,
+      projects: projects.filter(p => p.type === 'project').length,
+      partnerships: projects.filter(p => p.type === 'partnership').length,
     };
     return stats;
+  };
+
+  const handleViewDetails = (project: MyProject) => {
+    if (project.type === 'project') {
+      navigate(`/projects/${project.id}`);
+    } else {
+      navigate(`/partnerships/${project.id}`);
+    }
   };
 
   if (loading) {
@@ -140,15 +193,15 @@ const MyProjects = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Meus Projetos</h1>
-          <p className="text-gray-600">Projetos em andamento e finalizados</p>
+          <p className="text-gray-600">Projetos e parcerias em andamento e finalizados</p>
         </div>
 
         {/* Header com estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-              <div className="text-sm text-gray-500">Total de Projetos</div>
+              <div className="text-sm text-gray-500">Total</div>
             </CardContent>
           </Card>
           <Card>
@@ -161,6 +214,18 @@ const MyProjects = () => {
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
               <div className="text-sm text-gray-500">Concluídos</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-blue-600">{stats.projects}</div>
+              <div className="text-sm text-gray-500">Projetos</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-purple-600">{stats.partnerships}</div>
+              <div className="text-sm text-gray-500">Parcerias</div>
             </CardContent>
           </Card>
         </div>
@@ -188,6 +253,17 @@ const MyProjects = () => {
                 <SelectItem value="completed">Concluídos</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-48">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="project">Projetos</SelectItem>
+                <SelectItem value="partnership">Parcerias</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -199,11 +275,11 @@ const MyProjects = () => {
                 <Calendar className="h-16 w-16 mx-auto" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {projects.length === 0 ? 'Nenhum projeto em andamento ou finalizado' : 'Nenhum projeto encontrado'}
+                {projects.length === 0 ? 'Nenhum projeto ou parceria encontrado' : 'Nenhum resultado encontrado'}
               </h3>
               <p className="text-gray-500 mb-4">
                 {projects.length === 0 
-                  ? 'Seus projetos aparecerão aqui quando forem aceitos por profissionais'
+                  ? 'Seus projetos e parcerias aparecerão aqui quando forem aceitos'
                   : 'Tente ajustar os filtros para encontrar seus projetos'
                 }
               </p>
@@ -212,13 +288,18 @@ const MyProjects = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Card key={`${project.type}-${project.id}`} className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
                     <CardTitle className="text-lg line-clamp-2">
                       {project.title}
                     </CardTitle>
-                    <ProjectStatusBadge status={project.status} />
+                    <div className="flex flex-col items-end gap-1">
+                      <ProjectStatusBadge status={project.status} />
+                      <Badge variant="outline" className="text-xs">
+                        {project.type === 'project' ? 'Projeto' : 'Parceria'}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Badge variant="outline">{project.services.category}</Badge>
@@ -258,7 +339,7 @@ const MyProjects = () => {
                   </div>
 
                   <Button 
-                    onClick={() => navigate(`/projects/${project.id}`)}
+                    onClick={() => handleViewDetails(project)}
                     variant="outline"
                     size="sm"
                     className="w-full"
