@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +15,9 @@ import PartnershipStatusUpdater from '@/components/partnerships/PartnershipStatu
 import ServiceCompletionConfirmation from '@/components/reviews/ServiceCompletionConfirmation';
 import MutualReviewSystem from '@/components/reviews/MutualReviewSystem';
 import ClientLayout from '@/components/layout/ClientLayout';
+import type { Database } from '@/integrations/supabase/types';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 interface PartnershipDemand {
   id: string;
@@ -26,7 +30,7 @@ interface PartnershipDemand {
   location?: string;
   required_skills?: string;
   created_at: string;
-  status: string;
+  status: ProjectStatus;
   professional_id: string;
   services: {
     name: string;
@@ -51,6 +55,7 @@ interface Application {
   created_at: string;
   status: 'pending' | 'accepted' | 'rejected';
   professional?: {
+    id: string;
     name: string;
     avatar_url?: string;
     area_of_expertise?: string;
@@ -109,7 +114,7 @@ const PartnershipDetails = () => {
         .from('partnership_applications')
         .select(`
           *,
-          professional:profiles!partnership_applications_professional_id_fkey(name, avatar_url, area_of_expertise)
+          professional:profiles!partnership_applications_professional_id_fkey(id, name, avatar_url, area_of_expertise)
         `)
         .eq('partnership_demand_id', id);
 
@@ -290,7 +295,7 @@ const PartnershipDetails = () => {
                 currentStatus={demand.status}
                 userType={profile?.user_type === 'admin' ? 'professional' : (profile?.user_type || 'professional')}
                 isCreator={isOwnDemand}
-                isPartner={partnerProfessional && profile?.id === partnerProfessional.id}
+                isPartner={partnerProfessional ? profile?.id === partnerProfessional.id : false}
                 onStatusUpdate={fetchPartnershipDemand}
               />
             )}
