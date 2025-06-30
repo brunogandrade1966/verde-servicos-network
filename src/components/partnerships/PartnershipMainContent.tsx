@@ -100,6 +100,12 @@ const PartnershipMainContent = ({
     return null;
   };
 
+  // Convert userType to the expected type for PartnershipStatusUpdater
+  const getValidUserType = (type?: string): 'client' | 'professional' => {
+    if (type === 'client') return 'client';
+    return 'professional'; // Default to professional for admin and professional types
+  };
+
   return (
     <div className="lg:col-span-2 space-y-6">
       {/* Card with project description */}
@@ -158,7 +164,7 @@ const PartnershipMainContent = ({
         <PartnershipStatusUpdater
           demandId={demand.id}
           currentStatus={demand.status}
-          userType={userType === 'admin' ? 'professional' : (userType || 'professional')}
+          userType={getValidUserType(userType)}
           isCreator={isOwnDemand}
           isPartner={partnerProfessional ? profileId === partnerProfessional.id : false}
           onStatusUpdate={onStatusUpdate}
