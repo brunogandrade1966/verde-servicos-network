@@ -27,6 +27,7 @@ import MyApplications from '../../pages/MyApplications';
 import ReviewProfessional from '../../pages/ReviewProfessional';
 import ManageServices from '../../pages/ManageServices';
 import ImportServicesPage from '../../pages/ImportServices';
+import Reports from '../../pages/Reports';
 
 const AppRoutes = () => {
   return (
@@ -144,6 +145,16 @@ const AppRoutes = () => {
           <ReviewProfessional />
         </ProtectedRoute>
       } />
+
+      {/* Reports Route */}
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <Reports />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Partnership Routes */}
       <Route

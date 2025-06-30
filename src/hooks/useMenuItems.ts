@@ -10,7 +10,9 @@ import {
   Briefcase,
   Settings,
   Upload,
-  UserPlus
+  UserPlus,
+  ClipboardList,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,7 +25,7 @@ export const useMenuItems = () => {
         title: "Dashboard",
         icon: Home,
         path: "/dashboard",
-        description: "Visão geral e estatísticas"
+        description: "Visão geral de suas demandas, candidaturas e avaliações recebidas"
       }
     ];
 
@@ -79,40 +81,46 @@ export const useMenuItems = () => {
     const clientItems = [
       ...baseItems,
       {
-        title: "Solicitar Serviço",
-        icon: PlusCircle,
-        path: "/services",
-        description: "Buscar e solicitar serviços"
+        title: "Perfil",
+        icon: User,
+        path: "/profile",
+        description: "Edição dos dados pessoais, plano e informações de contato"
       },
       {
-        title: "Buscar Profissionais",
+        title: "Buscar Profissional",
         icon: Users,
         path: "/professionals",
-        description: "Encontrar profissionais qualificados"
+        description: "Lista de profissionais por serviço e localidade"
       },
       {
-        title: "Meus Projetos",
-        icon: Briefcase,
-        path: "/my-projects",
-        description: "Projetos em andamento e concluídos"
+        title: "Criar Demanda",
+        icon: PlusCircle,
+        path: "/create-project",
+        description: "Formulário para solicitar um novo serviço ambiental"
       },
       {
         title: "Minhas Demandas",
-        icon: FileText,
-        path: "/my-demands",
-        description: "Demandas publicadas"
+        icon: Briefcase,
+        path: "/my-projects",
+        description: "Lista das demandas contratadas ou em andamento"
       },
       {
-        title: "Candidaturas Recebidas",
-        icon: MessageSquare,
+        title: "Candidaturas",
+        icon: ClipboardList,
         path: "/applications",
-        description: "Gerenciar candidaturas"
+        description: "Lista de profissionais que se candidataram às suas demandas"
       },
       {
-        title: "Meu Perfil",
-        icon: User,
-        path: "/profile",
-        description: "Configurações do perfil"
+        title: "Mensagens",
+        icon: MessageSquare,
+        path: "/messages",
+        description: "Interface de chat com os profissionais envolvidos"
+      },
+      {
+        title: "Relatórios",
+        icon: BarChart3,
+        path: "/reports",
+        description: "Histórico de contratações, avaliações e execução"
       }
     ];
 
