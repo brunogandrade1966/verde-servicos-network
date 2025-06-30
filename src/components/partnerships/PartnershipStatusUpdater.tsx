@@ -46,7 +46,10 @@ const PartnershipStatusUpdater = ({
     if (isCreator && userType === 'professional') {
       switch (currentStatus) {
         case 'draft':
-          return { open: baseStatuses.open };
+          return { 
+            open: baseStatuses.open,
+            cancelled: baseStatuses.cancelled 
+          };
         case 'open':
           return { 
             in_progress: baseStatuses.in_progress,
@@ -64,7 +67,10 @@ const PartnershipStatusUpdater = ({
       // Profissional parceiro pode marcar como concluído quando em andamento
       switch (currentStatus) {
         case 'in_progress':
-          return { completed: baseStatuses.completed };
+          return { 
+            completed: baseStatuses.completed,
+            cancelled: baseStatuses.cancelled 
+          };
         default:
           return {};
       }
@@ -123,7 +129,7 @@ const PartnershipStatusUpdater = ({
     }
   };
 
-  if (!isCreator && !isPartner || Object.keys(availableStatuses).length === 0) {
+  if ((!isCreator && !isPartner) || Object.keys(availableStatuses).length === 0) {
     return (
       <Card>
         <CardHeader>

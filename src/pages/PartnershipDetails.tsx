@@ -210,6 +210,9 @@ const PartnershipDetails = () => {
     );
   }
 
+  const acceptedApplication = applications.find(app => app.status === 'accepted');
+  const partnerProfessional = acceptedApplication?.professional;
+
   return (
     <ClientLayout>
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -229,6 +232,7 @@ const PartnershipDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Conteúdo Principal */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Card with project description */}
             <Card>
               <CardHeader>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -278,6 +282,41 @@ const PartnershipDetails = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Partnership Status Updater */}
+            {(isOwnDemand || (partnerProfessional && profile?.id === partnerProfessional.id)) && (
+              <PartnershipStatusUpdater
+                demandId={demand.id}
+                currentStatus={demand.status}
+                userType={profile?.user_type === 'admin' ? 'professional' : (profile?.user_type || 'professional')}
+                isCreator={isOwnDemand}
+                isPartner={partnerProfessional && profile?.id === partnerProfessional.id}
+                onStatusUpdate={fetchPartnershipDemand}
+              />
+            )}
+
+            {/* Service Completion Confirmation */}
+            {demand.status === 'completed' && isOwnDemand && partnerProfessional && (
+              <ServiceCompletionConfirmation
+                partnershipDemandId={demand.id}
+                providerId={partnerProfessional.id}
+                providerName={partnerProfessional.name}
+                contractorId={demand.professional_id}
+                status={demand.status}
+                onConfirmation={fetchPartnershipDemand}
+              />
+            )}
+
+            {/* Mutual Review System */}
+            {demand.status === 'completed' && partnerProfessional && (
+              <MutualReviewSystem
+                partnershipDemandId={demand.id}
+                professionalId={partnerProfessional.id}
+                professionalName={partnerProfessional.name}
+                contractorId={demand.professional_id}
+                status={demand.status}
+              />
+            )}
 
             {/* Applications */}
             <Card>
