@@ -12,7 +12,8 @@ import {
   Upload,
   UserPlus,
   ClipboardList,
-  BarChart3
+  BarChart3,
+  Handshake
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -25,7 +26,7 @@ export const useMenuItems = () => {
         title: "Dashboard",
         icon: Home,
         path: "/dashboard",
-        description: "Visão geral de suas demandas, candidaturas e avaliações recebidas"
+        description: "Visão geral de candidaturas, demandas em execução e avaliações"
       }
     ];
 
@@ -33,46 +34,52 @@ export const useMenuItems = () => {
       return [
         ...baseItems,
         {
-          title: "Meus Projetos",
-          icon: Briefcase,
-          path: "/contracted-projects",
-          description: "Projetos em andamento e concluídos"
+          title: "Perfil",
+          icon: User,
+          path: "/profile",
+          description: "Edição do perfil profissional (formação, serviços habilitados, entidade)"
         },
         {
-          title: "Publicar Solicitação de Parceria",
+          title: "Criar Solicitação de Parceria",
           icon: UserPlus,
           path: "/partnerships/create",
-          description: "Criar nova solicitação de parceria"
+          description: "Formulário para buscar outros profissionais"
         },
         {
-          title: "Minhas Solicitações de Parceria",
-          icon: FileText,
+          title: "Candidaturas Recebidas para Parceria",
+          icon: Handshake,
           path: "/my-partnership-requests",
-          description: "Solicitações de parceria publicadas"
+          description: "Profissionais interessados em suas parcerias"
         },
         {
-          title: "Demandas de Parcerias",
+          title: "Oportunidades",
           icon: Search,
-          path: "/partnerships",
-          description: "Buscar oportunidades de parceria"
-        },
-        {
-          title: "Demandas de Clientes",
-          icon: Users,
           path: "/projects",
-          description: "Buscar projetos disponíveis"
+          description: "Lista de demandas de clientes e parcerias abertas por outros profissionais"
         },
         {
           title: "Minhas Candidaturas",
-          icon: MessageSquare,
+          icon: ClipboardList,
           path: "/my-applications",
-          description: "Candidaturas enviadas"
+          description: "Candidaturas enviadas para demandas ou parcerias"
         },
         {
-          title: "Meu Perfil",
-          icon: User,
-          path: "/profile",
-          description: "Configurações do perfil"
+          title: "Demandas e Parcerias",
+          icon: Briefcase,
+          path: "/contracted-projects",
+          description: "Gestão de serviços em execução ou finalizados"
+        },
+        {
+          title: "Mensagens",
+          icon: MessageSquare,
+          path: "/messages",
+          description: "Interface de chat para comunicação com clientes e parceiros"
+        },
+        {
+          title: "Relatórios",
+          icon: BarChart3,
+          path: "/reports",
+          description: "Métricas de atuação, avaliações e histórico de trabalhos"
         }
       ];
     }
