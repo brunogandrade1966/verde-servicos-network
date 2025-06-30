@@ -77,8 +77,8 @@ export const useMenuItems = () => {
       ];
     }
 
-    // Menu para clientes
-    const clientItems = [
+    // Menu para clientes - estrutura atualizada conforme solicitado
+    return [
       ...baseItems,
       {
         title: "Perfil",
@@ -88,7 +88,7 @@ export const useMenuItems = () => {
       },
       {
         title: "Buscar Profissional",
-        icon: Users,
+        icon: Search,
         path: "/professionals",
         description: "Lista de profissionais por serviço e localidade"
       },
@@ -121,12 +121,9 @@ export const useMenuItems = () => {
         icon: BarChart3,
         path: "/reports",
         description: "Histórico de contratações, avaliações e execução"
-      }
-    ];
-
-    // Adicionar itens de menu para admin
-    if (profile?.user_type === 'admin') {
-      clientItems.push(
+      },
+      // Adicionar itens de menu para admin se necessário
+      ...(profile?.user_type === 'admin' ? [
         {
           title: "Gerenciar Serviços",
           icon: Settings,
@@ -139,10 +136,8 @@ export const useMenuItems = () => {
           path: "/admin/import-services",
           description: "Carregar serviços predefinidos"
         }
-      );
-    }
-
-    return clientItems;
+      ] : [])
+    ];
   };
 
   return getMenuItems();
