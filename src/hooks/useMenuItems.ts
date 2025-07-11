@@ -13,7 +13,8 @@ import {
   UserPlus,
   ClipboardList,
   BarChart3,
-  Handshake
+  Handshake,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -80,6 +81,12 @@ export const useMenuItems = () => {
           icon: BarChart3,
           path: "/reports",
           description: "Métricas de atuação, avaliações e histórico de trabalhos"
+        },
+        {
+          title: "Planos",
+          icon: CreditCard,
+          path: "/subscription",
+          description: "Gerenciar plano de assinatura e pagamentos"
         }
       ];
     }
@@ -123,12 +130,18 @@ export const useMenuItems = () => {
         path: "/messages",
         description: "Interface de chat com os profissionais envolvidos"
       },
-      {
-        title: "Relatórios",
-        icon: BarChart3,
-        path: "/reports",
-        description: "Histórico de contratações, avaliações e execução"
-      },
+        {
+          title: "Relatórios",
+          icon: BarChart3,
+          path: "/reports",
+          description: "Histórico de contratações, avaliações e execução"
+        },
+        {
+          title: "Planos",
+          icon: CreditCard,
+          path: "/subscription",
+          description: "Gerenciar plano de assinatura e pagamentos"
+        },
       // Adicionar itens de menu para admin se necessário
       ...(profile?.user_type === 'admin' ? [
         {

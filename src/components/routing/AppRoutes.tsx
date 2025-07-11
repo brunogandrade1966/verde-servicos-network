@@ -28,6 +28,7 @@ import ReviewProfessional from '../../pages/ReviewProfessional';
 import ManageServices from '../../pages/ManageServices';
 import ImportServicesPage from '../../pages/ImportServices';
 import Reports from '../../pages/Reports';
+import Subscription from '../../pages/Subscription';
 
 const AppRoutes = () => {
   return (
@@ -152,6 +153,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Reports />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/subscription"
+        element={
+          <ProtectedRoute>
+            <Subscription />
           </ProtectedRoute>
         }
       />
