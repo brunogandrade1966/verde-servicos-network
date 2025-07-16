@@ -87,66 +87,55 @@ const ProjectApplications = ({ applications, profile, onApplicationUpdate }: Pro
   };
 
   return (
-    <SubscriptionGuard
-      fallback={
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2" />
-              Candidaturas ({applications?.length || 0})
-            </CardTitle>
-            <CardDescription>
-              Assine um plano para ver as candidaturas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-500 py-8">
-              Você precisa de um plano ativo para visualizar os detalhes das candidaturas.
-            </p>
-          </CardContent>
-        </Card>
-      }
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Users className="h-5 w-5 mr-2" />
-            Candidaturas ({applications?.length || 0})
-          </CardTitle>
-          <CardDescription>
-            Profissionais interessados neste projeto
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {applications && applications.length > 0 ? (
-            <div className="space-y-4">
-              {applications.map((application) => (
-                <div key={application.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <User className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          {application.profiles?.name}
-                        </h4>
-                        <p className="text-sm text-gray-500">
-                          {new Date(application.created_at).toLocaleDateString('pt-BR')}
-                        </p>
-                      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Users className="h-5 w-5 mr-2" />
+          Candidaturas ({applications?.length || 0})
+        </CardTitle>
+        <CardDescription>
+          Profissionais interessados neste projeto
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {applications && applications.length > 0 ? (
+          <div className="space-y-4">
+            {applications.map((application) => (
+              <div key={application.id} className="border rounded-lg p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6 text-green-600" />
                     </div>
-                    <Badge variant={
-                      application.status === 'pending' ? 'secondary' : 
-                      application.status === 'accepted' ? 'default' :
-                      application.status === 'rejected' ? 'destructive' : 'secondary'
-                    }>
-                      {application.status === 'pending' ? 'Pendente' : 
-                       application.status === 'accepted' ? 'Aceita' : 
-                       application.status === 'rejected' ? 'Rejeitada' : application.status}
-                    </Badge>
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {application.profiles?.name}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        {new Date(application.created_at).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
                   </div>
+                  <Badge variant={
+                    application.status === 'pending' ? 'secondary' : 
+                    application.status === 'accepted' ? 'default' :
+                    application.status === 'rejected' ? 'destructive' : 'secondary'
+                  }>
+                    {application.status === 'pending' ? 'Pendente' : 
+                     application.status === 'accepted' ? 'Aceita' : 
+                     application.status === 'rejected' ? 'Rejeitada' : application.status}
+                  </Badge>
+                </div>
 
+                <SubscriptionGuard
+                  fallback={
+                    <div className="text-center py-4 border border-amber-200 bg-amber-50 rounded-lg">
+                      <p className="text-amber-800 text-sm">
+                        🔒 Assine um plano para ver os detalhes desta candidatura
+                      </p>
+                    </div>
+                  }
+                >
                   <p className="text-gray-700 mb-3">{application.proposal}</p>
 
                   <div className="flex items-center justify-between text-sm">
@@ -183,17 +172,17 @@ const ProjectApplications = ({ applications, profile, onApplicationUpdate }: Pro
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500 py-8">
-              Nenhuma candidatura recebida ainda.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-    </SubscriptionGuard>
+                </SubscriptionGuard>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 py-8">
+            Nenhuma candidatura recebida ainda.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
