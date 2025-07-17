@@ -8,79 +8,133 @@ import { useAuth } from "@/contexts/AuthContext";
 const plans = {
   client: [
     {
-      id: 'cliente_pf',
-      name: 'Cliente Pessoa Física',
-      price: 'R$ 29,99',
-      period: '/mês',
-      description: 'Para pessoas físicas que precisam de serviços ambientais',
+      id: 'plano_basico',
+      name: 'Plano Básico',
+      price: 'Gratuito',
+      period: '',
+      description: 'Crie demandas e receba candidaturas',
       features: [
         'Criar demandas ilimitadas',
-        'Visualizar candidaturas recebidas',
-        'Chat com profissionais',
-        'Relatórios básicos'
+        'Visualizar número de candidaturas',
+        'Publicação básica'
+      ],
+      isGratuito: true
+    },
+    {
+      id: 'acesso_total_unico',
+      name: 'Acesso Total (Por Demanda)',
+      price: 'R$ 79,00',
+      period: '/demanda',
+      description: 'Pagamento único por demanda criada',
+      features: [
+        'Tudo do Plano Básico',
+        'Ver detalhes completos das candidaturas',
+        'Sistema de mensagens diretas',
+        'Avaliar profissionais',
+        'Suporte dedicado'
       ]
     },
     {
-      id: 'cliente_pj',
-      name: 'Cliente Pessoa Jurídica',
-      price: 'R$ 99,99',
+      id: 'acesso_total_mensal',
+      name: 'Acesso Total (Mensal)',
+      price: 'R$ 199,00',
       period: '/mês',
-      description: 'Para empresas que necessitam de serviços ambientais',
+      description: 'Acesso total por assinatura mensal',
       features: [
-        'Criar demandas ilimitadas',
-        'Visualizar candidaturas recebidas',
-        'Chat com profissionais',
+        'Tudo do Plano Básico',
+        'Ver detalhes completos das candidaturas',
+        'Sistema de mensagens diretas',
+        'Avaliar profissionais',
+        'Demandas ilimitadas com acesso total',
         'Relatórios avançados',
-        'Suporte prioritário',
-        'Múltiplos projetos'
+        'Suporte prioritário'
       ]
     }
   ],
   professional: [
     {
-      id: 'profissional_basico',
-      name: 'Profissional Básico',
-      price: 'R$ 49,99',
-      period: '/mês',
-      description: 'Para profissionais iniciantes',
+      id: 'plano_semente',
+      name: 'Plano Semente',
+      price: 'Gratuito',
+      period: '',
+      description: 'Crie seu perfil e explore oportunidades',
       features: [
-        'Até 5 candidaturas por mês',
-        'Visualizar demandas disponíveis',
-        'Chat com clientes',
-        'Criar solicitações de parceria',
-        'Relatórios básicos'
-      ]
+        '1 serviço no perfil',
+        'Visualizar demandas',
+        'Receber notificações por email (com delay)',
+        'Perfil básico'
+      ],
+      limitations: {
+        services: 1,
+        applications: 0,
+        messages: false,
+        whatsapp: false
+      },
+      isGratuito: true
     },
     {
-      id: 'profissional_premium',
-      name: 'Profissional Premium',
-      price: 'R$ 99,99',
+      id: 'plano_raiz',
+      name: 'Plano Raiz',
+      price: 'R$ 49,00',
+      period: '/mês',
+      description: 'Para profissionais que estão começando',
+      features: [
+        '5 serviços no perfil',
+        '15 candidaturas por mês',
+        'Sistema de mensagens diretas',
+        'Notificações por email instantâneas',
+        'Busca ativa de oportunidades'
+      ],
+      limitations: {
+        services: 5,
+        applications: 15,
+        messages: true,
+        whatsapp: false
+      }
+    },
+    {
+      id: 'plano_copa',
+      name: 'Plano Copa',
+      price: 'R$ 89,00',
       period: '/mês',
       description: 'Para profissionais estabelecidos',
       features: [
-        'Até 15 candidaturas por mês',
-        'Visualizar demandas disponíveis',
-        'Chat com clientes',
-        'Criar solicitações de parceria',
-        'Relatórios avançados',
+        '15 serviços no perfil',
+        '50 candidaturas por mês',
+        'Sistema de mensagens diretas',
+        'Notificações por email instantâneas',
+        'Notificações via WhatsApp',
         'Destaque no perfil'
-      ]
+      ],
+      limitations: {
+        services: 15,
+        applications: 50,
+        messages: true,
+        whatsapp: true
+      }
     },
     {
-      id: 'profissional_enterprise',
-      name: 'Profissional Enterprise',
-      price: 'R$ 199,99',
+      id: 'plano_ecossistema',
+      name: 'Plano Ecossistema',
+      price: 'R$ 129,00',
       period: '/mês',
       description: 'Para profissionais de alto volume',
       features: [
+        'Serviços ilimitados no perfil',
         'Candidaturas ilimitadas',
-        'Visualizar demandas disponíveis',
-        'Chat com clientes',
-        'Criar solicitações de parceria',
+        'Sistema de mensagens diretas',
+        'Notificações por email instantâneas',
+        'Notificações via WhatsApp',
+        'Destaque premium no perfil',
         'Relatórios completos',
-        'Destaque premium',
         'Suporte prioritário'
-      ]
+      ],
+      limitations: {
+        services: 999,
+        applications: 999,
+        messages: true,
+        whatsapp: true
+      }
     }
   ]
 };
