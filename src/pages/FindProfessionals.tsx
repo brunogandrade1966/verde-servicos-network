@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import ProfessionalsFilters from '@/components/professionals/ProfessionalsFilters';
 import ProfessionalsGrid from '@/components/professionals/ProfessionalsGrid';
 import ClientLayout from '@/components/layout/ClientLayout';
+import { SubscriptionGuard } from '@/components/subscription/SubscriptionGuard';
 
 interface Professional {
   id: string;
@@ -163,7 +164,9 @@ const FindProfessionals = () => {
         </p>
       </div>
 
-      <ProfessionalsGrid professionals={filteredProfessionals} loading={loading} />
+      <SubscriptionGuard>
+        <ProfessionalsGrid professionals={filteredProfessionals} loading={loading} />
+      </SubscriptionGuard>
     </ClientLayout>
   );
 };
