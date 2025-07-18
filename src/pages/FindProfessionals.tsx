@@ -7,6 +7,7 @@ import ProfessionalsFilters from '@/components/professionals/ProfessionalsFilter
 import ProfessionalsGrid from '@/components/professionals/ProfessionalsGrid';
 import ClientLayout from '@/components/layout/ClientLayout';
 import { SubscriptionGuard } from '@/components/subscription/SubscriptionGuard';
+import { usePlanLimitations } from '@/hooks/usePlanLimitations';
 
 interface Professional {
   id: string;
@@ -34,6 +35,7 @@ interface Service {
 }
 
 const FindProfessionals = () => {
+  const { limitations } = usePlanLimitations();
   const { profile } = useAuth();
   const { toast } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -164,9 +166,13 @@ const FindProfessionals = () => {
         </p>
       </div>
 
-      <SubscriptionGuard>
+      {limitations.canViewCandidateDetails ? (
         <ProfessionalsGrid professionals={filteredProfessionals} loading={loading} />
-      </SubscriptionGuard>
+      ) : (
+        <SubscriptionGuard>
+          <ProfessionalsGrid professionals={filteredProfessionals} loading={loading} />
+        </SubscriptionGuard>
+      )}
     </ClientLayout>
   );
 };

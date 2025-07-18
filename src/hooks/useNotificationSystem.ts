@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePlanLimitations } from './usePlanLimitations';
 
 interface NotificationPreference {
-  id: string;
+  id?: string;
   professional_id: string;
   service_ids: string[];
   locations: string[];
   email_notifications: boolean;
   whatsapp_notifications: boolean;
-  notification_delay: number; // em minutos
+  notification_delay: number;
 }
 
 export const useNotificationSystem = () => {
@@ -29,40 +28,42 @@ export const useNotificationSystem = () => {
     if (!profile) return;
 
     try {
-      const { data, error } = await supabase
-        .from('notification_preferences')
-        .select('*')
-        .eq('professional_id', profile.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // Not found
-        console.error('Error loading preferences:', error);
-        return;
+      // Simplified approach - use local storage for now
+      const stored = localStorage.getItem(`notification_prefs_${profile.id}`);
+      if (stored) {
+        setPreferences(JSON.parse(stored));
+      } else {
+        // Set default preferences
+        const defaultPrefs: NotificationPreference = {
+          professional_id: profile.id,
+          service_ids: [],
+          locations: [],
+          email_notifications: true,
+          whatsapp_notifications: false,
+          notification_delay: 0
+        };
+        setPreferences(defaultPrefs);
       }
-
-      setPreferences(data);
     } catch (error) {
       console.error('Error loading notification preferences:', error);
     }
   };
 
   const updatePreferences = async (newPreferences: Partial<NotificationPreference>) => {
-    if (!profile) return;
+    if (!profile) return { success: false };
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('notification_preferences')
-        .upsert({
-          professional_id: profile.id,
-          ...newPreferences
-        }, { onConflict: 'professional_id' })
-        .select()
-        .single();
+      const updated = {
+        ...preferences,
+        ...newPreferences,
+        professional_id: profile.id
+      } as NotificationPreference;
 
-      if (error) throw error;
-
-      setPreferences(data);
+      // Save to local storage for now
+      localStorage.setItem(`notification_prefs_${profile.id}`, JSON.stringify(updated));
+      setPreferences(updated);
+      
       return { success: true };
     } catch (error) {
       console.error('Error updating preferences:', error);

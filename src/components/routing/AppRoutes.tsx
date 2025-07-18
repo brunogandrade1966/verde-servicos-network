@@ -29,6 +29,10 @@ import ManageServices from '../../pages/ManageServices';
 import ImportServicesPage from '../../pages/ImportServices';
 import Reports from '../../pages/Reports';
 import Subscription from '../../pages/Subscription';
+import AdminPanel from '../../pages/AdminPanel';
+import AdminUsers from '../../pages/AdminUsers';
+import AdminPlans from '../../pages/AdminPlans';
+import PendingReviews from '../../pages/PendingReviews';
 
 const AppRoutes = () => {
   return (
@@ -146,6 +150,11 @@ const AppRoutes = () => {
           <ReviewProfessional />
         </ProtectedRoute>
       } />
+      <Route path="/pending-reviews" element={
+        <ProtectedRoute>
+          <PendingReviews />
+        </ProtectedRoute>
+      } />
 
       {/* Reports Route */}
       <Route
@@ -234,6 +243,30 @@ const AppRoutes = () => {
       />
 
       {/* Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminPanel />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute>
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/plans"
+        element={
+          <ProtectedRoute>
+            <AdminPlans />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin/services"
         element={

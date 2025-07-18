@@ -156,6 +156,50 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_notifications: boolean
+          id: string
+          locations: string[] | null
+          notification_delay: number
+          professional_id: string
+          service_ids: string[] | null
+          updated_at: string
+          whatsapp_notifications: boolean
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          locations?: string[] | null
+          notification_delay?: number
+          professional_id: string
+          service_ids?: string[] | null
+          updated_at?: string
+          whatsapp_notifications?: boolean
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          locations?: string[] | null
+          notification_delay?: number
+          professional_id?: string
+          service_ids?: string[] | null
+          updated_at?: string
+          whatsapp_notifications?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
