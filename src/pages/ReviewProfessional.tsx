@@ -73,7 +73,7 @@ const ReviewProfessional = () => {
             .eq('project_id', projectId)
             .eq('reviewed_id', professionalId)
             .eq('reviewer_id', profile.id)
-            .single();
+            .maybeSingle();
 
           if (reviewError) {
             console.error("Error fetching existing review:", reviewError);

@@ -75,7 +75,7 @@ const MutualReviewSystem = ({
         .eq('project_id', reviewId)
         .eq('reviewer_id', profile.id)
         .eq('reviewed_id', professionalId)
-        .single();
+        .maybeSingle();
 
       setHasReviewedProfessional(!!professionalReview);
 
@@ -87,7 +87,7 @@ const MutualReviewSystem = ({
           .eq('project_id', reviewId)
           .eq('reviewer_id', profile.id)
           .eq('reviewed_id', clientId || contractorId)
-          .single();
+          .maybeSingle();
 
         setHasReviewedClient(!!clientReview);
       }
