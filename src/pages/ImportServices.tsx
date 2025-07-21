@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import ClientLayout from '@/components/layout/ClientLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import ImportServices from '@/components/admin/ImportServices';
 
 const ImportServicesPage = () => {
@@ -19,7 +19,7 @@ const ImportServicesPage = () => {
   console.log('ImportServicesPage - Rendering import services page for admin');
 
   return (
-    <ClientLayout>
+    <AdminLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Importar Serviços</h1>
@@ -28,7 +28,7 @@ const ImportServicesPage = () => {
         
         <ImportServices />
       </div>
-    </ClientLayout>
+    </AdminLayout>
   );
 };
 

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import ClientLayout from '@/components/layout/ClientLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 
 interface AdminStats {
   totalUsers: number;
@@ -65,7 +65,7 @@ export default function AdminPanel() {
   }
 
   return (
-    <ClientLayout>
+    <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Painel Administrativo</h1>
@@ -185,6 +185,6 @@ export default function AdminPanel() {
           </CardContent>
         </Card>
       </div>
-    </ClientLayout>
+    </AdminLayout>
   );
 }

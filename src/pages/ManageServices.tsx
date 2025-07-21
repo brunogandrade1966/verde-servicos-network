@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Briefcase } from 'lucide-react';
+import { Plus, Trash2, Briefcase, ArrowLeft, Leaf } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useServices } from '@/hooks/useServices';
-import ClientLayout from '@/components/layout/ClientLayout';
-import { ArrowLeft, Leaf } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface ProfessionalService {
   id: string;
@@ -146,7 +145,7 @@ const ManageServices = () => {
   );
 
   return (
-    <ClientLayout>
+    <AdminLayout>
       {/* Add New Service */}
       <Card className="mb-8">
         <CardHeader>
@@ -273,7 +272,7 @@ const ManageServices = () => {
           )}
         </CardContent>
       </Card>
-    </ClientLayout>
+    </AdminLayout>
   );
 };
 
