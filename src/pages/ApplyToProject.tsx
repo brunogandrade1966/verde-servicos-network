@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ClientLayout from '@/components/layout/ClientLayout';
+import { SubscriptionGuard } from '@/components/subscription/SubscriptionGuard';
 
 interface Project {
   id: string;
@@ -158,7 +159,8 @@ const ApplyToProject = () => {
 
   return (
     <ClientLayout>
-      <div className="max-w-4xl mx-auto">
+      <SubscriptionGuard>
+        <div className="max-w-4xl mx-auto">
         {/* Project Info Card */}
         <Card className="mb-6">
           <CardHeader>
@@ -256,7 +258,8 @@ const ApplyToProject = () => {
             </form>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </SubscriptionGuard>
     </ClientLayout>
   );
 };

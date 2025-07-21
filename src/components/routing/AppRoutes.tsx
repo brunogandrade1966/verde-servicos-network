@@ -24,6 +24,7 @@ import MyProjects from '../../pages/MyProjects';
 import MyDemands from '../../pages/MyDemands';
 import Applications from '../../pages/Applications';
 import MyApplications from '../../pages/MyApplications';
+import ApplyToProject from '../../pages/ApplyToProject';
 import ReviewProfessional from '../../pages/ReviewProfessional';
 import ManageServices from '../../pages/ManageServices';
 import ImportServicesPage from '../../pages/ImportServices';
@@ -118,6 +119,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ProjectDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/projects/:projectId/apply"
+        element={
+          <ProtectedRoute>
+            <ApplyToProject />
           </ProtectedRoute>
         }
       />
