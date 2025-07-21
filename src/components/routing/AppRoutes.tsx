@@ -25,6 +25,7 @@ import MyDemands from '../../pages/MyDemands';
 import Applications from '../../pages/Applications';
 import MyApplications from '../../pages/MyApplications';
 import ApplyToProject from '../../pages/ApplyToProject';
+import EditProject from '../../pages/EditProject';
 import ReviewProfessional from '../../pages/ReviewProfessional';
 import ManageServices from '../../pages/ManageServices';
 import ImportServicesPage from '../../pages/ImportServices';
@@ -33,6 +34,8 @@ import Subscription from '../../pages/Subscription';
 import AdminPanel from '../../pages/AdminPanel';
 import AdminUsers from '../../pages/AdminUsers';
 import AdminPlans from '../../pages/AdminPlans';
+import AdminStats from '../../pages/AdminStats';
+import AdminActivity from '../../pages/AdminActivity';
 import PendingReviews from '../../pages/PendingReviews';
 
 const AppRoutes = () => {
@@ -139,7 +142,15 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/projects"
+        path="/projects/:id/edit"
+        element={
+          <ProtectedRoute>
+            <EditProject />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/browse-projects"
         element={
           <ProtectedRoute>
             <BrowseProjects />
@@ -242,6 +253,16 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      {/* Browse Projects Route */}
+      <Route
+        path="/browse-projects"
+        element={
+          <ProtectedRoute>
+            <BrowseProjects />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/professionals"
         element={
@@ -273,6 +294,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AdminPlans />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/stats"
+        element={
+          <ProtectedRoute>
+            <AdminStats />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/activity"
+        element={
+          <ProtectedRoute>
+            <AdminActivity />
           </ProtectedRoute>
         }
       />
