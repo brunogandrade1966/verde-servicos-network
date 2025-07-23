@@ -36,6 +36,15 @@ import AdminUsers from '../../pages/AdminUsers';
 import AdminPlans from '../../pages/AdminPlans';
 import AdminStats from '../../pages/AdminStats';
 import AdminActivity from '../../pages/AdminActivity';
+import AdminProfiles from '../../pages/AdminProfiles';
+import AdminPermissions from '../../pages/AdminPermissions';
+import AdminProjects from '../../pages/AdminProjects';
+import AdminPartnerships from '../../pages/AdminPartnerships';
+import AdminSubscribers from '../../pages/AdminSubscribers';
+import AdminReviews from '../../pages/AdminReviews';
+import AdminMessages from '../../pages/AdminMessages';
+import AdminDatabase from '../../pages/AdminDatabase';
+import AdminSettings from '../../pages/AdminSettings';
 import PendingReviews from '../../pages/PendingReviews';
 
 const AppRoutes = () => {
@@ -326,6 +335,78 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ImportServicesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/profiles"
+        element={
+          <ProtectedRoute>
+            <AdminProfiles />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/permissions"
+        element={
+          <ProtectedRoute>
+            <AdminPermissions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/projects"
+        element={
+          <ProtectedRoute>
+            <AdminProjects />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/partnerships"
+        element={
+          <ProtectedRoute>
+            <AdminPartnerships />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/subscribers"
+        element={
+          <ProtectedRoute>
+            <AdminSubscribers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reviews"
+        element={
+          <ProtectedRoute>
+            <AdminReviews />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/messages"
+        element={
+          <ProtectedRoute>
+            <AdminMessages />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/database"
+        element={
+          <ProtectedRoute>
+            <AdminDatabase />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute>
+            <AdminSettings />
           </ProtectedRoute>
         }
       />
