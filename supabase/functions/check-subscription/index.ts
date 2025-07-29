@@ -89,14 +89,18 @@ serve(async (req) => {
         const priceId = subscription.items.data[0].price.id;
         const price = await stripe.prices.retrieve(priceId);
         const amount = price.unit_amount || 0;
-        if (amount <= 3000) {
-          subscriptionTier = "cliente_pf";
-        } else if (amount <= 5000) {
-          subscriptionTier = "profissional_basico";
-        } else if (amount <= 10000) {
-          subscriptionTier = "cliente_pj";
+        
+        // Map amounts to plan IDs (aligned with SubscriptionPlans component)
+        if (amount <= 5000) {
+          subscriptionTier = "plano_raiz"; // R$ 49,00
+        } else if (amount <= 8000) {
+          subscriptionTier = "acesso_total_unico"; // R$ 79,00
+        } else if (amount <= 9000) {
+          subscriptionTier = "plano_copa"; // R$ 89,00
+        } else if (amount <= 13000) {
+          subscriptionTier = "plano_ecossistema"; // R$ 129,00
         } else {
-          subscriptionTier = "profissional_enterprise";
+          subscriptionTier = "acesso_total_mensal"; // R$ 199,00
         }
       }
       logStep("Determined subscription tier", { subscriptionTier });

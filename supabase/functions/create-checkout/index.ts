@@ -38,13 +38,16 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    // Define pricing based on plan type
+    // Define pricing based on plan type (aligned with SubscriptionPlans component)
     const planConfig = {
-      'cliente_pf': { amount: 2999, name: 'Plano Cliente Pessoa Física' }, // R$ 29,99
-      'cliente_pj': { amount: 9999, name: 'Plano Cliente Pessoa Jurídica' }, // R$ 99,99
-      'profissional_basico': { amount: 4999, name: 'Plano Profissional Básico' }, // R$ 49,99
-      'profissional_premium': { amount: 9999, name: 'Plano Profissional Premium' }, // R$ 99,99
-      'profissional_enterprise': { amount: 19999, name: 'Plano Profissional Enterprise' }, // R$ 199,99
+      // Client plans
+      'acesso_total_unico': { amount: 7900, name: 'Acesso Total (Por Demanda)' }, // R$ 79,00
+      'acesso_total_mensal': { amount: 19900, name: 'Acesso Total (Mensal)' }, // R$ 199,00
+      
+      // Professional plans
+      'plano_raiz': { amount: 4900, name: 'Plano Raiz' }, // R$ 49,00
+      'plano_copa': { amount: 8900, name: 'Plano Copa' }, // R$ 89,00
+      'plano_ecossistema': { amount: 12900, name: 'Plano Ecossistema' }, // R$ 129,00
     };
 
     const config = planConfig[planType as keyof typeof planConfig];

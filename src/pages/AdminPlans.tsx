@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,9 +24,12 @@ interface Plan {
   user_type: 'client' | 'professional';
   limitations: Record<string, any>;
   active: boolean;
+  stripe_product_id?: string | null;
+  stripe_price_id?: string | null;
 }
 
 const defaultPlans: Plan[] = [
+  // Client plans
   {
     id: 'plano_basico',
     name: 'Plano Básico',
@@ -38,12 +42,36 @@ const defaultPlans: Plan[] = [
     active: true
   },
   {
+    id: 'acesso_total_unico',
+    name: 'Acesso Total (Por Demanda)',
+    price: 79,
+    period: '/demanda',
+    description: 'Pagamento único por demanda criada',
+    features: ['Tudo do Plano Básico', 'Ver detalhes completos das candidaturas', 'Sistema de mensagens diretas', 'Avaliar profissionais', 'Suporte dedicado'],
+    user_type: 'client',
+    limitations: {},
+    active: true
+  },
+  {
+    id: 'acesso_total_mensal',
+    name: 'Acesso Total (Mensal)',
+    price: 199,
+    period: '/mês',
+    description: 'Acesso total por assinatura mensal',
+    features: ['Tudo do Plano Básico', 'Ver detalhes completos das candidaturas', 'Sistema de mensagens diretas', 'Avaliar profissionais', 'Demandas ilimitadas com acesso total', 'Relatórios avançados', 'Suporte prioritário'],
+    user_type: 'client',
+    limitations: {},
+    active: true
+  },
+  
+  // Professional plans
+  {
     id: 'plano_semente',
     name: 'Plano Semente',
     price: 0,
     period: '',
     description: 'Crie seu perfil e explore oportunidades',
-    features: ['1 serviço no perfil', 'Visualizar demandas', 'Receber notificações por email (com delay)'],
+    features: ['1 serviço no perfil', 'Visualizar demandas', 'Receber notificações por email (com delay)', 'Perfil básico'],
     user_type: 'professional',
     limitations: { services: 1, applications: 0, messages: false, whatsapp: false },
     active: true
@@ -54,19 +82,42 @@ const defaultPlans: Plan[] = [
     price: 49,
     period: '/mês',
     description: 'Para profissionais que estão começando',
-    features: ['5 serviços no perfil', '15 candidaturas por mês', 'Sistema de mensagens diretas'],
+    features: ['5 serviços no perfil', '15 candidaturas por mês', 'Sistema de mensagens diretas', 'Notificações por email instantâneas', 'Busca ativa de oportunidades'],
     user_type: 'professional',
     limitations: { services: 5, applications: 15, messages: true, whatsapp: false },
+    active: true
+  },
+  {
+    id: 'plano_copa',
+    name: 'Plano Copa',
+    price: 89,
+    period: '/mês',
+    description: 'Para profissionais estabelecidos',
+    features: ['15 serviços no perfil', '50 candidaturas por mês', 'Sistema de mensagens diretas', 'Notificações por email instantâneas', 'Notificações via WhatsApp', 'Destaque no perfil'],
+    user_type: 'professional',
+    limitations: { services: 15, applications: 50, messages: true, whatsapp: true },
+    active: true
+  },
+  {
+    id: 'plano_ecossistema',
+    name: 'Plano Ecossistema',
+    price: 129,
+    period: '/mês',
+    description: 'Para profissionais de alto volume',
+    features: ['Serviços ilimitados no perfil', 'Candidaturas ilimitadas', 'Sistema de mensagens diretas', 'Notificações por email instantâneas', 'Notificações via WhatsApp', 'Destaque premium no perfil', 'Relatórios completos', 'Suporte prioritário'],
+    user_type: 'professional',
+    limitations: { services: 999, applications: 999, messages: true, whatsapp: true },
     active: true
   }
 ];
 
 export default function AdminPlans() {
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
   const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>(defaultPlans);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     if (profile?.user_type !== 'admin') {
@@ -88,6 +139,33 @@ export default function AdminPlans() {
     setIsDialogOpen(false);
   };
 
+  const syncWithStripe = async () => {
+    if (!session) {
+      toast.error('Sessão expirada');
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-stripe-plans', {
+        body: { plans },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      
+      setPlans(data.plans);
+      toast.success('Planos sincronizados com Stripe com sucesso!');
+    } catch (error) {
+      console.error('Error syncing with Stripe:', error);
+      toast.error('Erro ao sincronizar com Stripe');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleDeletePlan = (planId: string) => {
     setPlans(plans.filter(p => p.id !== planId));
     toast.success('Plano removido com sucesso!');
@@ -107,6 +185,13 @@ export default function AdminPlans() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Gerenciar Planos</h1>
           <div className="flex gap-2">
+            <Button 
+              onClick={syncWithStripe}
+              disabled={syncing}
+              variant="outline"
+            >
+              {syncing ? 'Sincronizando...' : 'Sincronizar com Stripe'}
+            </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => setEditingPlan(null)}>
@@ -143,14 +228,19 @@ export default function AdminPlans() {
               <CardDescription>Gerencie os planos disponíveis para clientes</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+                  <div className="space-y-4">
                 {plans.filter(p => p.user_type === 'client').map((plan) => (
                   <div key={plan.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
+                    <div className="flex-1">
                       <div className="font-medium">{plan.name}</div>
                       <div className="text-sm text-muted-foreground">
                         {formatPrice(plan.price)}{plan.period}
                       </div>
+                      {plan.stripe_product_id && (
+                        <div className="text-xs text-green-600 mt-1">
+                          ✓ Sincronizado com Stripe
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <Badge variant={plan.active ? "default" : "secondary"}>
@@ -186,14 +276,19 @@ export default function AdminPlans() {
               <CardDescription>Gerencie os planos disponíveis para profissionais</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+                  <div className="space-y-4">
                 {plans.filter(p => p.user_type === 'professional').map((plan) => (
                   <div key={plan.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
+                    <div className="flex-1">
                       <div className="font-medium">{plan.name}</div>
                       <div className="text-sm text-muted-foreground">
                         {formatPrice(plan.price)}{plan.period}
                       </div>
+                      {plan.stripe_product_id && (
+                        <div className="text-xs text-green-600 mt-1">
+                          ✓ Sincronizado com Stripe
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <Badge variant={plan.active ? "default" : "secondary"}>
